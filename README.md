@@ -1,10 +1,10 @@
-# # 🖥️ WebOS 12
+# 🖥️ WebOS 12
 
 A high-performance, browser-based desktop environment featuring a **glassmorphism** aesthetic, virtualized file system, and native **PWA** integration.
 
 ---
 
-## ## 🚀 Overview
+## 🚀 Overview
 
 WebOS 12 is a refined web environment built with **Vanilla JavaScript** and **modern CSS3**. It mimics a native desktop experience entirely within the browser.
 
@@ -17,7 +17,7 @@ WebOS 12 is a refined web environment built with **Vanilla JavaScript** and **mo
 
 ---
 
-## ## 🛠️ Project Structure
+## 🛠️ Project Structure
 
 | File | Purpose |
 | :--- | :--- |
@@ -27,17 +27,17 @@ WebOS 12 is a refined web environment built with **Vanilla JavaScript** and **mo
 
 ---
 
-## ## 💻 Technical Stack
+## 💻 Technical Stack
 
-* **Logic:** `JavaScript (ES6+)`
-* **Styling:** `CSS3 (Flexbox/Grid/Glassmorphism)`
-* **Icons:** `Lucide Icons`
-* **Typography:** `Plus Jakarta Sans`
-* **Service Worker:** `Cache API` for offline reliability.
+**Logic:** `JavaScript (ES6+)`
+**Styling:** `CSS3 (Flexbox/Grid/Glassmorphism)`
+**Icons:** `Lucide Icons`
+**Typography:** `Plus Jakarta Sans`
+**Service Worker:** `Cache API` for offline reliability.
 
 ---
 
-## ## 📥 Installation & Local Development
+## 📥 Installation & Local Development
 
 Because this project uses Service Workers, it **must** be served over a local or remote server.
 
@@ -59,7 +59,7 @@ Because this project uses Service Workers, it **must** be served over a local or
 
 ---
 
-## ## 📜 Usage & Pro-Tips
+## 📜 Usage & Pro-Tips
 
 * **Start Menu:** Click the WebOS logo to access pinned applications.
 * **Notifications:** Click the clock in the bottom right to toggle the notification center.

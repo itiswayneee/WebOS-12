@@ -82,3 +82,6 @@ case 'my-new-app':
   container.innerHTML = `<div class="p-4">Hello World</div>`;
   refreshLucideIcons(container);
   break;
+```
+---
+# Developed with 💙 by the WebOS Team

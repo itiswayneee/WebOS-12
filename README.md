@@ -84,4 +84,4 @@ case 'my-new-app':
   break;
 ```
 ---
-# Developed with 💙 by the WebOS Team
+## Developed with 💙 by the WebOS Team-Just me

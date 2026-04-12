@@ -8,7 +8,7 @@ A high-performance, browser-based desktop environment featuring a **glassmorphis
 
 WebOS 12 is a refined web environment built with **Vanilla JavaScript** and **modern CSS3**. It mimics a native desktop experience entirely within the browser.
 
-### ### Key Features
+### Key Features
 * **Window Management:** Drag, minimize, maximize, and stack windows.
 * **PWA Ready:** Includes `manifest.json` and `sw.js` for offline support and standalone installation.
 * **Integrated Apps:** Notepad, Explorer, Settings, Terminal, Calculator, Browser, and Developer Profile.
@@ -30,9 +30,13 @@ WebOS 12 is a refined web environment built with **Vanilla JavaScript** and **mo
 ## 💻 Technical Stack
 
 **Logic:** `JavaScript (ES6+)`
+
 **Styling:** `CSS3 (Flexbox/Grid/Glassmorphism)`
+
 **Icons:** `Lucide Icons`
+
 **Typography:** `Plus Jakarta Sans`
+
 **Service Worker:** `Cache API` for offline reliability.
 
 ---

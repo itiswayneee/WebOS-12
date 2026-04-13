@@ -58,15 +58,6 @@ Because this project uses Service Workers, it **must** be served over a local or
 
 ---
 
-## 📜 Usage & Pro-Tips
-
-* **Start Menu:** Click the WebOS logo to access pinned applications.
-* **Notifications:** Click the clock in the bottom right to toggle the notification center.
-* **Developer App:** Use the `Developer` icon to view system kernel details and stack information.
-* **PWA:** On Chrome/Edge, click the "Install" icon in the address bar to run WebOS as a standalone desktop app.
-
----
-
 ## ## 🛠️ Adding Custom Apps
 
 To add a new app, register it in the `APPS` array and update the `renderApp` function:

@@ -1,9 +1,5 @@
 # 🖥️ WebOS 12
 
-A high-performance, browser-based desktop environment featuring a **glassmorphism** aesthetic, virtualized file system, and native **PWA** integration.
-
----
-
 ## 🚀 Overview
 
 WebOS 12 is a refined web environment built with **Vanilla JavaScript** and **modern CSS3**. It mimics a native desktop experience entirely within the browser.

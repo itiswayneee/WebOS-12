@@ -70,4 +70,4 @@ case 'my-new-app':
   break;
 ```
 ---
-## Developed with 💙 by the WebOS Team ## -Just me
+## Developed with 💙 by the WebOS Team -Just me

@@ -50,11 +50,10 @@ Because this project uses Service Workers, it **must** be served over a local or
 2.  **Serve Locally:**
     Using Node.js:
     ```bash
-    npx serve .
+    npm install
     ```
-    Or Python:
     ```bash
-    python -m http.server 8000
+    npm start / node server.js
     ```
 
 ---

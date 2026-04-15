@@ -4,6 +4,7 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const multer = require('multer');
 
 const app = express();
 const server = http.createServer(app);
@@ -137,6 +138,31 @@ app.post('/api/file/move', (req, res) => {
 });
 
 app.delete('/api/file/delete', (req, res) => res.json({ success: deleteFileFromFolder(req.body.filePath) }));
+
+// File upload
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    let folder = req.query.folder || '/';
+    folder = folder.replace(/^\//, '');
+    if (!folder) folder = 'Desktop';
+    const destDir = path.join(filesDir, folder);
+    if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+    cb(null, destDir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  }
+});
+const upload = multer({ storage });
+
+app.post('/api/file/upload', upload.array('files', 50), (req, res) => {
+  const uploadedFiles = req.files.map(f => ({
+    name: f.originalname,
+    path: '/' + f.destination.split(path.sep).pop() + '/' + f.originalname,
+    size: f.size
+  }));
+  res.json({ success: true, files: uploadedFiles });
+});
 
 // Mail
 const mailMessages = [];

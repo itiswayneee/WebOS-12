@@ -1,0 +1,6 @@
+Welcome to WebOS 12!
+
+This is your virtual file system.
+You can create, edit, and delete files.
+
+Enjoy the experience!

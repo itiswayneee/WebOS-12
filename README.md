@@ -1,5 +1,9 @@
 # 🖥️ WebOS 12
 
+A high-performance, browser-based desktop environment featuring a **glassmorphism** aesthetic, virtualized file system, and native **PWA** integration.
+
+---
+
 ## 🚀 Overview
 
 WebOS 12 is a refined web environment built with **Vanilla JavaScript** and **modern CSS3**. It mimics a native desktop experience entirely within the browser.
@@ -50,11 +54,21 @@ Because this project uses Service Workers, it **must** be served over a local or
 2.  **Serve Locally:**
     Using Node.js:
     ```bash
-    npm install
+    npx serve .
     ```
+    Or Python:
     ```bash
-    npm start / node server.js
+    python -m http.server 8000
     ```
+
+---
+
+## 📜 Usage & Pro-Tips
+
+* **Start Menu:** Click the WebOS logo to access pinned applications.
+* **Notifications:** Click the clock in the bottom right to toggle the notification center.
+* **Developer App:** Use the `Developer` icon to view system kernel details and stack information.
+* **PWA:** On Chrome/Edge, click the "Install" icon in the address bar to run WebOS as a standalone desktop app.
 
 ---
 
@@ -70,4 +84,4 @@ case 'my-new-app':
   break;
 ```
 ---
-## Developed with 💙 by the WebOS Team -Just me
+## Developed with 💙 by the WebOS Team-Just me

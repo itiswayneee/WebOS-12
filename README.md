@@ -17,16 +17,6 @@ WebOS 12 is a refined web environment built with **Vanilla JavaScript** and **mo
 
 ---
 
-## 🛠️ Project Structure
-
-| File | Purpose |
-| :--- | :--- |
-| `Index.html` | Core OS engine, UI styles, and application logic. |
-| `manifest.json` | PWA configuration for mobile and desktop installation. |
-| `sw.js` | Service Worker handling resource caching and performance. |
-
----
-
 ## 💻 Technical Stack
 
 **Logic:** `JavaScript (ES6+)`
@@ -52,13 +42,12 @@ Because this project uses Service Workers, it **must** be served over a local or
     ```
 
 2.  **Serve Locally:**
-    Using Node.js:
     ```bash
-    npx serve .
+    npm install
     ```
-    Or Python:
+
     ```bash
-    python -m http.server 8000
+    npm start / node server.js
     ```
 
 ---
@@ -77,11 +66,27 @@ Because this project uses Service Workers, it **must** be served over a local or
 To add a new app, register it in the `APPS` array and update the `renderApp` function:
 
 ```javascript
-// Step 1: Update renderApp switch case
-case 'my-new-app':
-  container.innerHTML = `<div class="p-4">Hello World</div>`;
-  refreshLucideIcons(container);
-  break;
+// Step 1: Update APPS for the OS to recognise the app
+
+const APPS = {
+    my-app: { name:'App-Name',icon:'lucide-icon-name, w:--, h:--, pinned:false/true },
+}
+```
+
+```javascript
+//Step 2: Now the renderApp section for the app to render the windows.
+
+function renderApp(appId, container, winId, extra) {
+  switch(appId) {
+    case 'App-Name':    renderApp-Name(container, winId, extra); break;
+  }
+}
+```
+
+```javascript
+//Step 3: Now the renderApp section for the app to render the windows.
+
+function renderApp-Name() {YOUR FUNCTIONS}
 ```
 ---
 ## Developed with 💙 by the WebOS Team-Just me

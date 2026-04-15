@@ -1,33 +1,81 @@
 # 🖥️ WebOS 12
 
-A high-performance, browser-based desktop environment featuring a **glassmorphism** aesthetic, virtualized file system, and native **PWA** integration.
+A refined web environment built with **Vanilla JavaScript** and **modern CSS3**. It mimics a native desktop experience entirely within the browser.
 
----
+## Key Features
+### Productivity & Tools
 
-## 🚀 Overview
+* **Notepad:** Full text editor with line/word counting and local file saving.
 
-WebOS 12 is a refined web environment built with **Vanilla JavaScript** and **modern CSS3**. It mimics a native desktop experience entirely within the browser.
+* **Calculator:** Standard arithmetic functions with a modern UI.
 
-### Key Features
-* **Window Management:** Drag, minimize, maximize, and stack windows.
-* **PWA Ready:** Includes `manifest.json` and `sw.js` for offline support and standalone installation.
-* **Integrated Apps:** Notepad, Explorer, Settings, Terminal, Calculator, Browser, and Developer Profile.
-* **Live Notifications:** Integrated Notification Center with persistent logging.
-* **Battery API:** Real-time battery status monitoring (Fixed for modern browsers).
+* **Terminal:** Command-line interface with support for ls, cd, mkdir, touch, cat, rm, mv, and sysinfo.
 
----
+* **Calendar:** View dates and manage schedules with a global world clock integration.
 
-## 💻 Technical Stack
+* **Weather:** Real-time weather reporting and forecasts.
 
-**Logic:** `JavaScript (ES6+)`
+### Media & Creativity
 
-**Styling:** `CSS3 (Flexbox/Grid/Glassmorphism)`
+* **Music Player & Radio:** Integrated radio station search and a mini-player "pill" mode.
 
-**Icons:** `Lucide Icons`
+* **Video Player:** Support for playing local video files with progress seeking and full-screen capability.
 
-**Typography:** `Plus Jakarta Sans`
+* **Paint:** Canvas-based drawing tool with color selection and brush controls.
 
-**Service Worker:** `Cache API` for offline reliability.
+* **Browser:** Sandboxed web browsing environment.
+
+### Communication & System
+
+* **Global Chat:** Real-time messaging system using socket.io to connect with other online users.
+
+* **Mail:** Email client interface with inbox management.
+
+* **Task Manager:** Monitor system performance and manage running processes.
+
+* **Recycle Bin:** Restore or permanently delete removed files.
+
+### Personalization & Customization
+
+* **Themes:** Seamless switching between Light and Dark modes.
+
+* **Dynamic Wallpapers:** Multiple backgrounds and a "Random Wallpaper" shuffle feature.
+
+* **Accent Colors:** Customizable system UI colors for buttons and indicators.
+
+* **Grid System:** Flexible desktop icon placement with automatic grid alignment.
+
+* **Pinning:** Ability to pin or unpin any application to the taskbar.
+
+* **Multi-Language:** Support for over 10 languages including English, Spanish, French, Japanese, and Ukrainian.
+
+### Other UI Features
+
+* **Snap Overlay:** Visual guide for snapping windows to 50% split-screen views.
+
+* **Focus Windows:** Windows Focus handling that brings active windows to the front.
+
+* **Start Menu Search:** Real-time search for apps, files, and system settings.
+
+* **Quick Settings:** Panel for Wi-Fi, Bluetooth, volume, and brightness sliders.
+
+* **Notification Center:** Logs all system alerts and sound toggles.
+
+* **System Tray:** Dynamic clock, date, battery level indicator, and status icons.
+
+### Technical Infrastructure
+
+* **File System:** Virtualized directory structure containing Desktop, Documents, Pictures, Music, Downloads, and Videos.
+
+* **Backend Support:** Node.js/Express server handling file I/O, localStorage persistence, and real-time socket communication.
+
+* **UX Enhancements:** Motion One animations for smooth window transitions and Lucide icons for a consistent visual language.
+
+* **Icons:** `Lucide Icons`
+
+* **Typography:** `Plus Jakarta Sans`
+
+* **Service Worker:** `Cache API` for offline reliability.
 
 ---
 
@@ -49,15 +97,6 @@ Because this project uses Service Workers, it **must** be served over a local or
     ```bash
     npm start / node server.js
     ```
-
----
-
-## 📜 Usage & Pro-Tips
-
-* **Start Menu:** Click the WebOS logo to access pinned applications.
-* **Notifications:** Click the clock in the bottom right to toggle the notification center.
-* **Developer App:** Use the `Developer` icon to view system kernel details and stack information.
-* **PWA:** On Chrome/Edge, click the "Install" icon in the address bar to run WebOS as a standalone desktop app.
 
 ---
 

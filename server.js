@@ -41,12 +41,7 @@ function readFileAsBase64(filePath) {
   const fullPath = path.join(filesDir, filePath.replace(/\//g, path.sep));
   if (fs.existsSync(fullPath)) {
     const ext = filePath.split('.').pop().toLowerCase();
-    const mimeTypes = { 
-        'png': 'image/png', 'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 
-        'gif': 'image/gif', 'webp': 'image/webp', 'svg': 'image/svg+xml', 
-        'mp4': 'video/mp4', 'webm': 'video/webm', 'avi': 'video/x-msvideo', 
-        'mov': 'video/quicktime', 'mkv': 'video/x-matroska' 
-    };
+    const mimeTypes = { 'png': 'image/png', 'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'gif': 'image/gif', 'webp': 'image/webp', 'svg': 'image/svg+xml', 'mp4': 'video/mp4', 'webm': 'video/webm', 'avi': 'video/x-msvideo', 'mov': 'video/quicktime', 'mkv': 'video/x-matroska' };
     const mime = mimeTypes[ext] || 'application/octet-stream';
     return `data:${mime};base64,${fs.readFileSync(fullPath).toString('base64')}`;
   }
@@ -61,7 +56,6 @@ function deleteFileFromFolder(filePath) {
 
 function getAllFiles(dir = filesDir, baseDir = filesDir) {
   let results = [];
-  if (!fs.existsSync(dir)) return results; // Safety check
   fs.readdirSync(dir, { withFileTypes: true }).forEach(item => {
     const fullPath = path.join(dir, item.name);
     const relativePath = path.relative(baseDir, fullPath).replace(/\\/g, '/');
@@ -70,12 +64,11 @@ function getAllFiles(dir = filesDir, baseDir = filesDir) {
   });
   return results;
 }
-
 // API
 app.get('/api/session', (req, res) => {
   const username = (req.query.name || 'User').trim() || 'User';
   const uniquePart = req.query.id || sessionId.slice(-6);
-  const userEmail = `${username.toLowerCase().replace(/[^a-z0-9]/g, '')}_${uniquePart}@webos.local`;
+  const userEmail = `${username.toLowerCase().replace(/[^a-z0-9]/g, '')}_${uniquePart}@webos`;
   res.json({ sessionId, email: userEmail, name: username });
 });
 

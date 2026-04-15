@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -4034,9 +4034,12 @@ async function initMail() {
   }
 }
 
-async function loadMail() {
+async function loadMail(folder = 'inbox') {
   try {
-    const res = await fetch('/api/mail/messages');
+    const endpoint = folder === 'sent' ? '/api/mail/sent' : '/api/mail/inbox';
+    const res = await fetch(endpoint, {
+      headers: { 'X-User-Email': userEmail }
+    });
     mailMessages = await res.json();
     return mailMessages;
   } catch (e) {
@@ -4056,23 +4059,22 @@ function updateMailCount() {
   }
 }
 
-function renderMailList() {
+function renderMailList(folder = 'inbox') {
   if (!currentMailWinId) return;
   const list = document.getElementById(`mail_list_${currentMailWinId}`);
   if (mailMessages.length === 0) {
     list.innerHTML = `
       <div style="padding:40px;text-align:center;color:var(--text-sec)">
         ${lucideIconHtml('mail', 32)}
-        <div style="margin-top:12px">No messages</div>
+        <div style="margin-top:12px">${folder === 'sent' ? 'No sent messages' : 'No messages'}</div>
         <div style="font-size:11px;color:var(--text-ter);margin-top:8px">Your email: <span style="color:var(--accent-light)">${userEmail || 'Loading...'}</span></div>
       </div>`;
     return;
   }
   
-  const inbox = mailMessages.filter(m => m.to === userEmail || !m.sent);
-  list.innerHTML = inbox.map((e, i) => `
+  list.innerHTML = mailMessages.map((e) => `
     <div class="mail-item ${e.unread ? 'unread' : ''}" data-id="${e.id}">
-      <div class="mail-avatar">${(e.from || 'U').charAt(0).toUpperCase()}</div>
+      <div class="mail-avatar">${(folder === 'sent' ? (e.to || 'U') : (e.from || 'U')).charAt(0).toUpperCase()}</div>
       <div class="mail-content">
         <div class="mail-subject">${escapeHtml(e.subject || 'No Subject')}</div>
         <div class="mail-preview">${escapeHtml(e.body || '').substring(0, 50)}</div>
@@ -4091,7 +4093,8 @@ function renderMailList() {
         const view = document.getElementById(`mail_view_${currentMailWinId}`);
         view.classList.add('active');
         view.querySelector('.mail-view-subject').textContent = email.subject || 'No Subject';
-        view.querySelector('.mail-view-meta').textContent = `From: ${email.from} Â· ${email.time} Â· ${email.date}`;
+        const metaText = folder === 'sent' ? `To: ${email.to}` : `From: ${email.from}`;
+        view.querySelector('.mail-view-meta').textContent = `${metaText} · ${email.time} · ${email.date}`;
         view.querySelector('.mail-view-body').textContent = email.body || '';
         email.unread = false;
         item.classList.remove('unread');
@@ -4108,8 +4111,8 @@ function renderMail(container, winId) {
   
   async function setup() {
     await initMail();
-    await loadMail();
-    renderMailList();
+    await loadMail(currentFolder);
+    renderMailList(currentFolder);
     updateMailCount();
     document.getElementById(`mail_email_${winId}`).textContent = userEmail || 'Not available';
   }
@@ -4170,8 +4173,8 @@ function renderMail(container, winId) {
   });
   
   document.getElementById(`mail_refresh_${winId}`).addEventListener('click', async () => {
-    await loadMail();
-    renderMailList();
+    await loadMail(currentFolder);
+    renderMailList(currentFolder);
   });
   
   document.getElementById(`mail_send_${winId}`).addEventListener('click', async () => {
@@ -4187,7 +4190,10 @@ function renderMail(container, winId) {
     try {
       const res = await fetch('/api/mail/send', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-User-Email': userEmail
+        },
         body: JSON.stringify({ to, subject, body })
       });
       const data = await res.json();
@@ -4197,8 +4203,11 @@ function renderMail(container, winId) {
         document.getElementById(`mail_to_${winId}`).value = '';
         document.getElementById(`mail_subj_${winId}`).value = '';
         document.getElementById(`mail_body_${winId}`).value = '';
-        await loadMail();
-        renderMailList();
+        currentFolder = 'sent';
+        container.querySelectorAll('.mail-folder').forEach(f => f.classList.remove('active'));
+        container.querySelector('[data-folder="sent"]').classList.add('active');
+        await loadMail('sent');
+        renderMailList('sent');
       }
     } catch (e) {
       showNotification('Mail', 'Failed to send message', 'alert-circle');
@@ -4206,13 +4215,16 @@ function renderMail(container, winId) {
   });
   
   container.querySelectorAll('.mail-folder').forEach(folder => {
-    folder.addEventListener('click', () => {
+    folder.addEventListener('click', async () => {
       container.querySelectorAll('.mail-folder').forEach(f => f.classList.remove('active'));
       folder.classList.add('active');
       currentFolder = folder.dataset.folder;
       
       if (currentFolder === 'compose') {
         document.getElementById(`mail_compose_overlay_${winId}`).style.display = 'flex';
+      } else {
+        await loadMail(currentFolder);
+        renderMailList(currentFolder);
       }
     });
   });
@@ -4334,11 +4346,28 @@ async function installApp(appId, app) {
 
 /* €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
    CHAT
-€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ */
+€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ */
 function renderChat(container, winId) {
   let currentUser = state.username || 'User';
   let chatSocket = null;
   let chatUsers = [];
+  
+  const CHAT_MESSAGES_KEY = 'wos_chat_messages';
+  
+  function getStoredMessages() {
+    try {
+      return JSON.parse(localStorage.getItem(CHAT_MESSAGES_KEY)) || [];
+    } catch (e) { return []; }
+  }
+  
+  function saveMessage(msg) {
+    const messages = getStoredMessages();
+    const exists = messages.some(m => m.id === msg.id);
+    if (!exists) {
+      messages.push(msg);
+      localStorage.setItem(CHAT_MESSAGES_KEY, JSON.stringify(messages));
+    }
+  }
   
   function connectToChat() {
     if (typeof io === 'undefined') {
@@ -4353,12 +4382,17 @@ function renderChat(container, winId) {
     });
     
     chatSocket.on('chat-users', (users) => {
-      chatUsers = users;
+      const seen = new Set();
+      chatUsers = users.filter(u => {
+        if (seen.has(u.id)) return false;
+        seen.add(u.id);
+        return true;
+      });
       renderChatUsers();
     });
     
     chatSocket.on('chat-message', (msg) => {
-      // Add all messages - the localId is just for deduping
+      saveMessage(msg);
       addMessageToChat(msg, true);
     });
     
@@ -4369,7 +4403,16 @@ function renderChat(container, winId) {
   
   function renderChatUsers() {
     const contactsEl = container.querySelector('.chat-contacts');
-    if (chatUsers.length === 0) {
+    const uniqueUsers = [];
+    const seenIds = new Set();
+    chatUsers.forEach(u => {
+      if (!seenIds.has(u.id)) {
+        seenIds.add(u.id);
+        uniqueUsers.push(u);
+      }
+    });
+    
+    if (uniqueUsers.length === 0) {
       contactsEl.innerHTML = `
         <div style="padding:20px;text-align:center;color:var(--text-sec);font-size:12px">
           No other users online<br/>
@@ -4378,7 +4421,7 @@ function renderChat(container, winId) {
       return;
     }
     
-    contactsEl.innerHTML = chatUsers.map((u, i) => `
+    contactsEl.innerHTML = uniqueUsers.map((u, i) => `
       <div class="chat-contact ${i === 0 ? 'active' : ''}" data-id="${u.id}">
         <div class="chat-contact-avatar">${u.name.charAt(0).toUpperCase()}</div>
         <div class="chat-contact-info">
@@ -4449,6 +4492,8 @@ function renderChat(container, winId) {
     
     const msg = { user: currentUser, text, time: new Date().toLocaleTimeString(), id: Date.now() };
     
+    saveMessage(msg);
+    
     // Only emit to socket, don't add locally - server will broadcast back
     if (chatSocket && chatSocket.connected) {
       chatSocket.emit('chat-message', { text, localId: msg.id });
@@ -4474,8 +4519,18 @@ function renderChat(container, winId) {
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
   
+  function loadStoredMessages() {
+    const stored = getStoredMessages();
+    if (stored.length > 0) {
+      messagesEl.innerHTML = '';
+      stored.forEach(msg => addMessageToChat(msg, true));
+    }
+  }
+  
   sendBtn.addEventListener('click', sendMessage);
   input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+  
+  loadStoredMessages();
   
   nameInput.addEventListener('change', () => {
     currentUser = nameInput.value || 'User';
@@ -4699,6 +4754,11 @@ function renderExplorer(container, winId, extra = {}) {
   }
 
   let serverFiles = null;
+  
+  function truncateName(name, maxLen = 10) {
+    if (name.length <= maxLen) return name;
+    return name.substring(0, maxLen) + '...';
+  }
 
   async function loadServerFiles() {
     if (serverFiles) return serverFiles;
@@ -4763,7 +4823,7 @@ function renderExplorer(container, winId, extra = {}) {
         if (f.thumb) {
           iconHtml = `<img src="${f.thumb}" style="width:36px;height:36px;object-fit:cover;border-radius:4px;" />`;
         }
-        el.innerHTML = `<div class="fi">${iconHtml}</div><div class="fn">${f.name}</div>`;
+        el.innerHTML = `<div class="fi">${iconHtml}</div><div class="fn">${truncateName(f.name)}</div>`;
         el.addEventListener('click', () => { selected = f.path; document.querySelectorAll(`#ex_files_${winId} .file-item`).forEach(e => e.classList.remove('selected')); el.classList.add('selected'); });
         el.addEventListener('dblclick', () => openExplorerItem(f));
         if (!isMediaFolder) {
@@ -4782,7 +4842,7 @@ function renderExplorer(container, winId, extra = {}) {
         if (f.thumb) {
           iconHtml = `<img src="${f.thumb}" style="width:22px;height:22px;object-fit:cover;border-radius:2px;" />`;
         }
-        el.innerHTML = `<div class="fli">${iconHtml}</div><div class="fln">${f.name}</div><div class="fld">${date}</div>`;
+        el.innerHTML = `<div class="fli">${iconHtml}</div><div class="fln">${truncateName(f.name)}</div><div class="fld">${date}</div>`;
         el.addEventListener('click', () => { selected = f.path; document.querySelectorAll(`#ex_files_${winId} .fl-item`).forEach(e => e.classList.remove('selected')); el.classList.add('selected'); });
         el.addEventListener('dblclick', () => openExplorerItem(f));
         if (!isMediaFolder) {
@@ -6796,27 +6856,31 @@ function showStep(step) {
 
 /*                                                        
    BATTERY SYSTEM
-                                                        */
+                                                         */
 async function initBattery() {
-  if (!navigator.getBattery) return;
-  try {
-    const battery = await navigator.getBattery();
-    const updateUI = () => {
-      const level = Math.round(battery.level * 100);
-      const batteryEl = document.getElementById('battery-level');
-      if (batteryEl) batteryEl.innerText = `${level}%`;
-    };
-
-    // Safe listener check
-    if (battery.addEventListener) {
-      battery.addEventListener('levelchange', updateUI);
-      battery.addEventListener('chargingchange', updateUI);
-    } else {
-      battery.onlevelchange = updateUI;
-      battery.onchargingchange = updateUI;
+  const mockBatteryLevel = Math.floor(Math.random() * 30) + 70;
+  let batteryLevel = mockBatteryLevel;
+  
+  const updateUI = () => {
+    const batteryEl = document.getElementById('battery-level');
+    if (batteryEl) batteryEl.innerText = `${batteryLevel}%`;
+    
+    const batteryIcon = document.querySelector('#battery-icon i');
+    if (batteryIcon) {
+      if (batteryLevel > 80) batteryIcon.setAttribute('data-lucide', 'battery-full');
+      else if (batteryLevel > 50) batteryIcon.setAttribute('data-lucide', 'battery-medium');
+      else if (batteryLevel > 20) batteryIcon.setAttribute('data-lucide', 'battery-low');
+      else batteryIcon.setAttribute('data-lucide', 'battery');
+      refreshLucideIcons(document.getElementById('battery-btn'));
     }
+  };
+
+  updateUI();
+  
+  setInterval(() => {
+    batteryLevel = Math.max(5, batteryLevel - 1);
     updateUI();
-  } catch (e) { console.error("Battery API access denied."); }
+  }, 60000);
 }
 
 function toggleQuickSettings() {

@@ -215,6 +215,10 @@ if (fs.existsSync(storageFile)) {
     } catch (e) { console.error("Initialization error:", e); }
 }
 
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // Dynamic Port Handling for Deployment
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`WebOS running on port ${PORT}`));

@@ -1542,6 +1542,14 @@ background: transparent !important;
 #install-files::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
 .lang-option:hover, .region-option:hover { background: rgba(255,255,255,0.1) !important; transform: translateX(6px); }
 .lang-option[style*="rgba(0,120,212,0.2)"], .region-option.selected { border-color: #60cdff !important; background: rgba(0,120,212,0.2) !important; }
+
+.file-item-name, .app-name {
+  max-width: 100px;         /* Adjust based on your icon size */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;  /* Automatically adds ... */
+  display: inline-block;
+}   
 </style>
 </head>
 <body>

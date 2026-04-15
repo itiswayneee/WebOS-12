@@ -17,10 +17,6 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
-function formatName(name) {
-  return name.length > 10 ? name.substring(0, 10) + '...' : name;
-}
-
 // Files directory
 const filesDir = path.join(__dirname, 'files');
 ['Desktop', 'Documents', 'Pictures', 'Music', 'Downloads', 'Videos'].forEach(f => {

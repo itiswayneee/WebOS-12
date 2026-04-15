@@ -140,16 +140,32 @@ app.delete('/api/file/delete', (req, res) => res.json({ success: deleteFileFromF
 
 // Mail
 const mailMessages = [];
-app.get('/api/mail/messages', (req, res) => res.json(mailMessages));
+app.get('/api/mail/messages', (req, res) => {
+  const userEmailHeader = req.headers['x-user-email'] || userEmail;
+  const filtered = mailMessages.filter(m => m.to === userEmailHeader || m.from === userEmailHeader);
+  res.json(filtered);
+});
 app.post('/api/mail/send', (req, res) => {
+  const userEmailHeader = req.headers['x-user-email'] || userEmail;
   mailMessages.push({ 
     id: Date.now(), 
-    from: userEmail, 
+    from: userEmailHeader, 
     ...req.body, 
     time: new Date().toLocaleTimeString(), 
-    date: new Date().toDateString() 
+    date: new Date().toDateString(),
+    sentBy: userEmailHeader
   });
   res.json({ success: true });
+});
+app.get('/api/mail/inbox', (req, res) => {
+  const userEmailHeader = req.headers['x-user-email'] || userEmail;
+  const inbox = mailMessages.filter(m => m.to === userEmailHeader);
+  res.json(inbox);
+});
+app.get('/api/mail/sent', (req, res) => {
+  const userEmailHeader = req.headers['x-user-email'] || userEmail;
+  const sent = mailMessages.filter(m => m.from === userEmailHeader);
+  res.json(sent);
 });
 
 // Chat

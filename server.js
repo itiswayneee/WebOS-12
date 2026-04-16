@@ -139,6 +139,27 @@ app.post('/api/file/move', (req, res) => {
 
 app.delete('/api/file/delete', (req, res) => res.json({ success: deleteFileFromFolder(req.body.filePath) }));
 
+app.post('/api/file/delete', (req, res) => {
+  const filePath = path.join(filesDir, req.body.filePath.replace(/\//g, path.sep));
+  if (!fs.existsSync(filePath)) { res.json({ success: false }); return; }
+  try {
+    fs.unlinkSync(filePath);
+    res.json({ success: true });
+  } catch(e) { res.json({ success: false }); }
+});
+
+app.post('/api/file/rename', (req, res) => {
+  const oldPath = path.join(filesDir, req.body.oldPath.replace(/\//g, path.sep));
+  const newName = req.body.newName;
+  const dir = path.dirname(oldPath);
+  const newPath = path.join(dir, newName);
+  if (!fs.existsSync(oldPath)) { res.json({ success: false }); return; }
+  try {
+    fs.renameSync(oldPath, newPath);
+    res.json({ success: true });
+  } catch(e) { res.json({ success: false }); }
+});
+
 // File upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

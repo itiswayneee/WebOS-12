@@ -2,13 +2,14 @@
 <html lang="en" data-theme="dark">
 <head>
 <script src="https://unpkg.com/lucide@latest"></script>
-<script src="https://unpkg.com/@motionone/dom@latest/dist/motion.iife.js"></script>
+<script src="https://unpkg.com/motion@10.16.4/dist/motion.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <link rel="manifest" href="manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="picture.png" />
 <title>WebOS 12</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -636,6 +637,7 @@ input, textarea { font-family: var(--font); }
   cursor:pointer; transition:background var(--transition), transform var(--transition);
 }
 .file-item:hover    { background: var(--surface-hover); transform: translateX(4px); }
+.file-item:focus    { outline: 2px solid var(--accent); outline-offset: 2px; }
 .file-item.selected { background: rgba(0,120,212,.2); outline:1px solid rgba(0,120,212,.4); transform: scale(1.02); }
 .file-item .fi  { font-size:36px; flex-shrink:0; }
 .file-item .fn  { 
@@ -651,6 +653,7 @@ input, textarea { font-family: var(--font); }
   transition: background var(--transition); font-size:13px;
 }
 .fl-item:hover    { background: var(--surface-hover); }
+.fl-item:focus    { outline: 2px solid var(--accent); outline-offset: 2px; }
 .fl-item.selected { background: rgba(0,120,212,.2); }
 .fl-item .fli  { font-size:20px; }
 .fl-item .fln  { flex:1; }
@@ -1823,17 +1826,17 @@ background: transparent !important;
   <div id="start-body">
     <div id="start-view-default">
       <div class="start-section">
-        <div class="start-section-title">Pinned</div>
+        <div class="start-section-title">Pinned <a href="#" id="start-more-link" style="cursor:pointer;font-weight:400;font-size:12px;color:var(--accent);">All apps →</a></div>
         <div id="start-apps-grid"></div>
       </div>
       <div class="start-section" id="start-rec-section">
-        <div class="start-section-title">Recommended <a href="#" id="start-more-link">All apps</a></div>
+        <div class="start-section-title">Recommended</div>
         <div id="start-rec-list"></div>
       </div>
     </div>
     <div id="start-view-all" class="start-view-all hidden">
       <div class="start-section">
-        <div class="start-section-title">All apps</div>
+        <div class="start-section-title">All apps <a href="#" id="start-back-link" style="cursor:pointer;font-weight:400;font-size:12px;color:var(--accent);">← Back</a></div>
         <div id="start-all-apps-grid" class="start-all-apps-grid"></div>
       </div>
     </div>
@@ -2943,12 +2946,15 @@ function findFreeDesktopCellForApp() {
 
 function buildStartRec() {
   const list = document.getElementById('start-rec-list');
+  const recSection = document.getElementById('start-rec-section');
+  const moreLink = document.getElementById('start-more-link');
   list.innerHTML = '';
-  // Show recent files from Documents
   const files = fsListDir('/Documents').slice(0, 6);
-  if (!files.length) { document.getElementById('start-rec-section').style.display = 'none'; return; }
-  document.getElementById('start-rec-section').style.display = 'block';
-  files.forEach(f => {
+  if (!files.length) {
+    recSection.style.display = 'none';
+  } else {
+    recSection.style.display = 'block';
+    files.forEach(f => {
     const item = document.createElement('div');
     item.className = 'sr-item';
     item.innerHTML = `<div class="sri">${lucideIconHtml(fileTypeLucide(f.name, f.type), 26)}</div><div class="srn">${f.name}</div>`;
@@ -2961,6 +2967,7 @@ function buildStartRec() {
     list.appendChild(item);
   });
   refreshLucideIcons(list);
+}
 }
 
 function buildStartAllApps() {
@@ -4991,12 +4998,36 @@ function renderExplorer(container, winId, extra = {}) {
 
   function handleExplorerDrop(destPath, e) {
     const src = e.dataTransfer.getData('application/x-webos-path');
-    if (src && FS[src]) {
+    if (!src) return;
+    
+    // Check if it's a local FS file
+    if (FS[src]) {
       if (normPath(destPath) === fsParent(src)) return;
       if (fsMovePath(src, destPath)) {
         showNotification('File Explorer', `Moved "${src.split('/').pop()}"`, 'folder-sync');
+        renderFiles();
       }
+      return;
     }
+    
+    // Handle server files (Pictures, Music, Videos folders)
+    const srcFolder = '/' + src.split('/')[1];
+    const srcName = src.split('/').pop();
+    const destFolder = destPath === '/' ? '' : destPath.slice(1);
+    
+    fetch('/api/file/move', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        srcPath: srcFolder + '/' + srcName, 
+        destPath: (destFolder ? '/' + destFolder : '') + '/' + srcName 
+      })
+    }).then(() => {
+      loadServerFiles(true).then(() => renderFiles());
+      showNotification('File Explorer', `Moved "${srcName}"`, 'folder-sync');
+    }).catch(() => {
+      showNotification('File Explorer', 'Failed to move file', 'alert-circle');
+    });
   }
   
   async function handleExternalFiles(destPath, files) {
@@ -5019,8 +5050,7 @@ function renderExplorer(container, winId, extra = {}) {
       
       if (data.success && data.files && data.files.length > 0) {
         showNotification('File Explorer', `Uploaded ${data.files.length} file(s)`, 'upload-cloud');
-        serverFiles = null;
-        await loadServerFiles();
+        await loadServerFiles(true);
         renderFiles();
       }
     } catch (err) {
@@ -5055,8 +5085,8 @@ function renderExplorer(container, winId, extra = {}) {
     return name.substring(0, maxLen) + '...';
   }
 
-  async function loadServerFiles() {
-    if (serverFiles) return serverFiles;
+  async function loadServerFiles(forceRefresh = false) {
+    if (serverFiles && !forceRefresh) return serverFiles;
     try {
       const res = await fetch('/api/files');
       serverFiles = await res.json();
@@ -5077,8 +5107,10 @@ function renderExplorer(container, winId, extra = {}) {
     if (isMediaFolder || isRoot) {
       const sf = await loadServerFiles();
       if (isRoot) {
-        const serverFolders = Object.keys(sf).filter(f => f !== 'root');
-        items = serverFolders.map(name => ({
+        const serverFolderNames = Object.keys(sf).filter(f => f !== 'root');
+        const localDirs = fsListDir('/').filter(f => f.type === 'dir').map(d => d.name);
+        const allFolderNames = [...new Set([...localDirs, ...serverFolderNames])].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+        items = allFolderNames.map(name => ({
           path: '/' + name,
           name: name,
           type: 'dir'
@@ -5108,12 +5140,13 @@ function renderExplorer(container, winId, extra = {}) {
       return;
     }
 
-    cnt.innerHTML = '';
+      cnt.innerHTML = '';
     if (viewMode === 'grid') {
       cnt.className = 'file-grid';
       items.forEach(f => {
         const el = document.createElement('div');
         el.className = 'file-item';
+        el.tabIndex = 0;
         let iconHtml = lucideIconHtml(fileTypeLucide(f.name, f.type), 36);
         if (f.thumb) {
           iconHtml = `<img src="${f.thumb}" style="width:36px;height:36px;object-fit:cover;border-radius:4px;" />`;
@@ -5121,10 +5154,8 @@ function renderExplorer(container, winId, extra = {}) {
         el.innerHTML = `<div class="fi">${iconHtml}</div><div class="fn">${truncateName(f.name)}</div>`;
         el.addEventListener('click', () => { selected = f.path; document.querySelectorAll(`#ex_files_${winId} .file-item`).forEach(e => e.classList.remove('selected')); el.classList.add('selected'); });
         el.addEventListener('dblclick', () => openExplorerItem(f));
-        if (!isMediaFolder) {
-          el.addEventListener('contextmenu', e => { e.preventDefault(); selected = f.path; showFileContextMenu(e.clientX, e.clientY, f, winId, renderFiles); });
-          bindFileElDnD(el, f);
-        }
+        el.addEventListener('contextmenu', e => { e.preventDefault(); selected = f.path; showFileContextMenu(e.clientX, e.clientY, f, winId, renderFiles, loadServerFiles); });
+        bindFileElDnD(el, f);
         cnt.appendChild(el);
       });
     } else {
@@ -5132,6 +5163,7 @@ function renderExplorer(container, winId, extra = {}) {
       items.forEach(f => {
         const el = document.createElement('div');
         el.className = 'fl-item';
+        el.tabIndex = 0;
         const date = f.modified ? new Date(f.modified).toLocaleDateString() : '';
         let iconHtml = lucideIconHtml(fileTypeLucide(f.name, f.type), 22);
         if (f.thumb) {
@@ -5140,10 +5172,8 @@ function renderExplorer(container, winId, extra = {}) {
         el.innerHTML = `<div class="fli">${iconHtml}</div><div class="fln">${truncateName(f.name)}</div><div class="fld">${date}</div>`;
         el.addEventListener('click', () => { selected = f.path; document.querySelectorAll(`#ex_files_${winId} .fl-item`).forEach(e => e.classList.remove('selected')); el.classList.add('selected'); });
         el.addEventListener('dblclick', () => openExplorerItem(f));
-        if (!isMediaFolder) {
-          el.addEventListener('contextmenu', e => { e.preventDefault(); showFileContextMenu(e.clientX, e.clientY, f, winId, renderFiles); });
-          bindFileElDnD(el, f);
-        }
+        el.addEventListener('contextmenu', e => { e.preventDefault(); showFileContextMenu(e.clientX, e.clientY, f, winId, renderFiles, loadServerFiles); });
+        bindFileElDnD(el, f);
         cnt.appendChild(el);
       });
     }
@@ -5180,6 +5210,30 @@ function renderExplorer(container, winId, extra = {}) {
 
   document.getElementById(`ex_addr_${winId}`).addEventListener('keydown', e => {
     if (e.key === 'Enter') navigate(e.target.value);
+  });
+
+  document.getElementById(`ex_files_${winId}`).addEventListener('keydown', e => {
+    if (e.key === 'Delete' && selected) {
+      e.preventDefault();
+      const serverFolders = ['/Pictures', '/Music', '/Videos'];
+      const isServerFile = serverFolders.some(f => selected.startsWith(f));
+      if (isServerFile) {
+        fetch('/api/file/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filePath: selected })
+        }).then(() => {
+          selected = null;
+          loadServerFiles(true).then(() => renderFiles());
+          showNotification('File Explorer', 'File deleted', 'trash-2');
+        }).catch(() => showNotification('File Explorer', 'Delete failed', 'alert-circle'));
+      } else {
+        fsDelete(selected);
+        renderFiles();
+        showNotification('File Explorer', 'Item deleted', 'trash-2');
+        selected = null;
+      }
+    }
   });
 
   document.getElementById(`ex_sb_${winId}`).addEventListener('click', e => {
@@ -5288,22 +5342,67 @@ function renderExplorer(container, winId, extra = {}) {
   refreshLucideIcons(container);
 }
 
-function showFileContextMenu(x, y, f, winId, refresh) {
+function showFileContextMenu(x, y, f, winId, refresh, loadServerFilesFn) {
+  const serverFolders = ['/Pictures', '/Music', '/Videos'];
+  const isServerFile = serverFolders.some(folder => f.path.startsWith(folder));
+  const handleOpen = () => {
+    if (f.type === 'dir') { /* navigated via dblclick */ }
+    else if (f.isImg) {
+      if (f.thumb) launchApp('gallery-viewer', { path: f.path, src: f.thumb });
+      else launchApp('gallery-viewer', { path: f.path, src: `/api/file/read/json?path=${encodeURIComponent(f.path)}` });
+    }
+    else if (f.isVid) {
+      const vidSrc = `/api/file/video?path=${encodeURIComponent(f.path)}`;
+      launchApp('video-player', { path: f.path, src: vidSrc });
+    }
+    else if (f.isMusic) {
+      const audioSrc = `/api/file/audio?path=${encodeURIComponent(f.path)}`;
+      launchApp('music', { file: f.path, src: audioSrc });
+    }
+    else {
+      openFileInNotepad(f.path);
+    }
+  };
   const items = [
-    { lucide: f.type === 'dir' ? 'folder-open' : 'file-text', label: 'Open', action: () => {
-      if (f.type === 'dir') { /* navigated via dblclick */ }
-      else openFileInNotepad(f.path);
-    }},
+    { lucide: f.type === 'dir' ? 'folder-open' : 'file-text', label: 'Open', action: handleOpen },
     { sep: true },
     { lucide: 'pencil', label: 'Rename', action: () => {
       const n = prompt('Rename to:', f.name);
-      if (n && n !== f.name) { fsRename(f.path, n); refresh(); }
+      if (n && n !== f.name) { 
+        if (isServerFile) {
+          fetch('/api/file/rename', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ oldPath: f.path, newName: n })
+          }).then(() => {
+            loadServerFilesFn(true).then(() => refresh());
+            showNotification('File Explorer', 'File renamed', 'check');
+          }).catch(() => showNotification('File Explorer', 'Rename failed', 'alert-circle'));
+        } else {
+          fsRename(f.path, n); 
+          refresh(); 
+          showNotification('File Explorer', 'File renamed', 'check');
+        }
+      }
     }},
-    { lucide: 'trash-2', label: 'Move to Recycle Bin', cls: 'danger', action: () => {
-      if (confirm(`Move "${f.name}" to Recycle Bin?`)) { recyclePath(f.path); refresh(); }
+    { lucide: 'trash-2', label: 'Delete', cls: 'danger', action: () => {
+      if (isServerFile) {
+        fetch('/api/file/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filePath: f.path })
+        }).then(() => {
+          loadServerFilesFn(true).then(() => refresh());
+          showNotification('File Explorer', 'File deleted', 'trash-2');
+        }).catch(() => showNotification('File Explorer', 'Delete failed', 'alert-circle'));
+      } else {
+        fsDelete(f.path); 
+        refresh(); 
+        showNotification('File Explorer', 'File deleted', 'trash-2');
+      }
     }},
   ];
-  if (f.type === 'file') {
+  if (f.type === 'file' && !isServerFile) {
     items.unshift({ lucide: 'clipboard', label: 'Copy content', action: () => navigator.clipboard?.writeText(FS[f.path]?.content || '').catch(() => {}) });
   }
   showContextMenu(x, y, items);
@@ -5345,11 +5444,9 @@ function renderRecycle(container, winId) {
           }
         };
         row.querySelector('.rb-purge').onclick = () => {
-          if (confirm('Permanently delete "' + entry.name + '"?')) {
-            purgeRecycleEntry(entry.id);
-            showNotification('Recycle Bin', 'Removed from bin', 'trash-2');
-            render();
-          }
+          purgeRecycleEntry(entry.id);
+          showNotification('Recycle Bin', 'Permanently deleted', 'trash-2');
+          render();
         };
         list.appendChild(row);
       });
@@ -5357,11 +5454,9 @@ function renderRecycle(container, winId) {
     }
     document.getElementById(`rb_empty_${winId}`).onclick = () => {
       if (!RECYCLE_BIN.length) return;
-      if (confirm('Permanently delete all items in the Recycle Bin?')) {
-        emptyRecycleBinPermanently();
-        showNotification('Recycle Bin', 'Recycle Bin emptied', 'trash-2');
-        render();
-      }
+      emptyRecycleBinPermanently();
+      showNotification('Recycle Bin', 'Recycle Bin emptied', 'trash-2');
+      render();
     };
   }
   render();
@@ -6599,13 +6694,10 @@ function showDesktopIconContextMenu(x, y, def) {
   }
   
   if (def.path && def.key.startsWith('d:') && FS[def.path]) {
-    items.push({ lucide: 'trash-2', label: 'Move to Recycle Bin', cls: 'danger', action: () => {
-      if (confirm(`Move "${def.label}" to Recycle Bin?`)) {
-        if (recyclePath(def.path)) {
-          buildDesktopIcons();
-          showNotification('Recycle Bin', 'Item moved to Recycle Bin', 'trash-2');
-        }
-      }
+    items.push({ lucide: 'trash-2', label: 'Delete', cls: 'danger', action: () => {
+      fsDelete(def.path);
+      buildDesktopIcons();
+      showNotification('Desktop', 'Item deleted', 'trash-2');
     }});
   }
   showContextMenu(x, y, items);
@@ -6705,17 +6797,16 @@ document.getElementById('start-more-link').addEventListener('click', (e) => {
   e.stopPropagation();
   const va = document.getElementById('start-view-all');
   const vd = document.getElementById('start-view-default');
-  const link = e.currentTarget;
   if (!va || !vd) return;
-  const showingAll = !va.classList.contains('hidden');
-  if (!showingAll) {
-    va.classList.remove('hidden');
-    vd.style.display = 'none';
-    link.textContent = 'Back';
-    buildStartAllApps();
-  } else {
-    resetStartMenuAllAppsView();
-  }
+  va.classList.remove('hidden');
+  vd.style.display = 'none';
+  buildStartAllApps();
+});
+
+document.getElementById('start-back-link')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  resetStartMenuAllAppsView();
 });
 
 document.addEventListener('click', (e) => {
@@ -6988,7 +7079,7 @@ function init() {
     { code: 'uk', name: 'Українська', native: 'Ukrainian' },
     { code: 'el', name: 'Ελληνικά', native: 'Greek' }
   ];
-  
+
   function populateLanguages() {
     const container = document.getElementById('language-list');
     if (!container) return;
@@ -7006,11 +7097,11 @@ function init() {
       });
     });
   }
-  
-function showStep(step) {
+
+  function showStep(step) {
     console.log('showStep called:', step);
     const stepId = typeof step === 'number' ? 'setup-step-' + step.toString().replace('.', '-') : 'setup-step-' + step;
-    document.querySelectorAll('[id^=\"setup-step-\"]').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('[id^="setup-step-"]').forEach(el => el.style.display = 'none');
     const stepEl = document.getElementById(stepId);
     if (stepEl) {
       stepEl.style.display = 'block';
@@ -7021,7 +7112,7 @@ function showStep(step) {
     if (overlay) refreshLucideIcons(overlay);
     console.log('Step ID:', stepId, 'Step element:', stepEl ? 'found' : 'NOT FOUND');
   }
-  
+
   function startInstallation() {
     showStep(3);
     const files = [
@@ -7102,15 +7193,15 @@ function showStep(step) {
     
     setTimeout(() => processFile(0), 500);
   }
-  
+
   // Populate language list on load
   populateLanguages();
-  
+
   // Check for new install and show setup - also check URL parameter
   const urlParams = new URLSearchParams(window.location.search);
   const forceSetup = urlParams.get('setup') === '1';
   console.log('isNewInstall:', isNewInstall, 'state.installed:', state.installed, 'forceSetup:', forceSetup);
-  
+
   // Always show setup if ?setup=1 or fresh install
   if (forceSetup || !state.installed) {
     setTimeout(() => {
@@ -7129,7 +7220,7 @@ function showStep(step) {
       refreshLucideIcons(overlay);
     }, 500);
   }
-  
+
   // Step 1 - Language next
   document.getElementById('setup-step1-next').addEventListener('click', () => {
     showStep(1.5);
@@ -7144,7 +7235,7 @@ function showStep(step) {
       selectedTimezone = opt.dataset.tz;
     });
   });
-  document.querySelector('.region-option[data-region=\"us\"]').classList.add('selected');
+  document.querySelector('.region-option[data-region="us"]').classList.add('selected');
   
   // Step 1.5 - Back
   document.getElementById('setup-step1-5-back').addEventListener('click', () => {
@@ -7204,7 +7295,7 @@ function showStep(step) {
     }, 400);
     showNotification('Welcome to WebOS 12', 'Your PC is ready, ' + username + '!', 'sparkles');
   });
-  
+
   const qsB = document.getElementById('qs-brightness');
   if (qsB) qsB.addEventListener('input', () => applyBrightness(qsB.value));
 
@@ -7234,7 +7325,7 @@ function showStep(step) {
 
 /*                                                        
    BATTERY SYSTEM
-                                                         */
+                                                          */
 async function initBattery() {
   const mockBatteryLevel = Math.floor(Math.random() * 30) + 70;
   let batteryLevel = mockBatteryLevel;

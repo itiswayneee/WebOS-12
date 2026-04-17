@@ -85,7 +85,7 @@ Because this project uses Service Workers, it **must** be served over a local or
 
 1.  **Clone the Repository:**
     ```bash
-    git clone [https://github.com/itiswayneee/webos-12.git](https://github.com/itiswayneee/webos-12.git)
+    git clone https://github.com/itiswayneee/webos-12.git
     cd webos-12
     ```
 

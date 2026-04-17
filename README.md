@@ -89,7 +89,7 @@ Because this project uses Service Workers, it **must** be served over a local or
     cd webos-12
     ```
 
-2.  **Serve Locally:**
+2.  **Run Locally:**
     ```bash
     npm install
     ```
@@ -100,7 +100,7 @@ Because this project uses Service Workers, it **must** be served over a local or
 
 ---
 
-## ## 🛠️ Adding Custom Apps
+## 🛠️ Adding Custom Apps
 
 To add a new app, register it in the `APPS` array and update the `renderApp` function:
 
@@ -128,4 +128,4 @@ function renderApp(appId, container, winId, extra) {
 function renderApp-Name() {YOUR FUNCTIONS}
 ```
 ---
-## Developed with 💙 by the WebOS Team-Just me
+## Developed with 💙 by the Wayne

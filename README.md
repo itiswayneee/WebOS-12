@@ -79,9 +79,11 @@ A refined web environment built with **Vanilla JavaScript** and **modern CSS3**.
 
 ---
 
-## 📥 Installation & Local Development
+## 📥 Installation
 
 Because this project uses Service Workers, it **must** be served over a local or remote server.
+
+**A) OPTION A**
 
 1.  **Clone the Repository:**
     ```bash
@@ -97,6 +99,11 @@ Because this project uses Service Workers, it **must** be served over a local or
     ```bash
     npm start / node server.js
     ```
+
+**B) OPTION B**
+
+1.   Go to the [releases](https://github.com/itiswayneee/WebOS-12/releases) menu.
+2.   Get the [latest]((https://github.com/itiswayneee/WebOS-12/releases/latest) .exe then enjoy
 
 ---
 

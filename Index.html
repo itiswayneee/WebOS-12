@@ -255,6 +255,10 @@ input, textarea { font-family: var(--font); }
   border-radius: var(--radius-lg);
   display: flex; align-items: center; justify-content: center;
   z-index: 8000;
+  background: var(--taskbar);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  transition: background 0.3s ease, backdrop-filter 0.3s ease, -webkit-backdrop-filter 0.3s ease;
 }
 #taskbar-center {
   display: flex; align-items: center; gap: 2px; height:100%;
@@ -1464,16 +1468,16 @@ html.reduce-transparency .nc-item {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
-html.reduce-transparency[data-theme="dark"] #taskbar { background: #1c1c1c; }
-html.reduce-transparency[data-theme="light"] #taskbar { background: #ebebeb; }
+html.reduce-transparency[data-theme="dark"] #taskbar { background: #1c1c1c; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+html.reduce-transparency[data-theme="light"] #taskbar { background: #ebebeb; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 html.reduce-transparency[data-theme="dark"] #start-menu { background: #252525; }
 html.reduce-transparency[data-theme="light"] #start-menu { background: #f0f0f0; }
 html.reduce-transparency[data-theme="dark"] .flyout-panel { background: #2a2a2a; }
 html.reduce-transparency[data-theme="light"] .flyout-panel { background: #eaeaea; }
 html.reduce-transparency[data-theme="dark"] .window { background: #2d2d2d; }
 html.reduce-transparency[data-theme="light"] .window { background: #f5f5f5; }
-html.reduce-transparency[data-theme="dark"] #notification-center { background: #2a2a2a; }
-html.reduce-transparency[data-theme="light"] #notification-center { background: #ececec; }
+html.reduce-transparency[data-theme="dark"] #notification-center { background: #2a2a2a; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+html.reduce-transparency[data-theme="light"] #notification-center { background: #ececec; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 html.reduce-transparency #alttab-overlay { backdrop-filter: none !important; }
 html.reduce-transparency .radio-pill {
   backdrop-filter: none !important;
@@ -3563,7 +3567,7 @@ function renderWeather(container, winId) {
     <div class="app-weather">
       <div class="weather-main">
         <div class="weather-icon">${lucideIconHtml(weatherData.icon, 72)}</div>
-        <div class="weather-temp">${weatherData.temp}Â°</div>
+        <div class="weather-temp">${weatherData.temp}°C</div>
         <div class="weather-desc">${weatherData.desc}</div>
         <div class="weather-loc">${lucideIconHtml('map-pin', 14)} San Francisco, CA</div>
       </div>
@@ -3578,7 +3582,7 @@ function renderWeather(container, winId) {
         </div>
         <div class="weather-detail">
           <div class="weather-detail-label">Feels Like</div>
-          <div class="weather-detail-val">${weatherData.feels}Â°</div>
+          <div class="weather-detail-val">${weatherData.feels}°C</div>
         </div>
       </div>
       <div class="weather-forecast">
@@ -3588,7 +3592,7 @@ function renderWeather(container, winId) {
             <div class="weather-fc-day">
               <div class="weather-fc-day-name">${f.day}</div>
               <div class="weather-fc-day-icon">${lucideIconHtml(f.icon, 20)}</div>
-              <div class="weather-fc-day-temp">${f.high}Â°</div>
+              <div class="weather-fc-day-temp">${f.high}°C</div>
             </div>
           `).join('')}
         </div>
@@ -6608,7 +6612,7 @@ function renderMusic(container, winId, extra = {}) {
     stations.forEach((t, i) => {
       const el = document.createElement('div');
       el.className = 'music-track';
-      const sub = [t.country, t.tags].filter(Boolean).join(' Â· ');
+      const sub = [t.country, t.tags].filter(Boolean).join(' · ');
       el.innerHTML = `<span class="mti">${lucideIconHtml('disc-3', 22)}</span><div class="mtn"><div>${escapeHtml(t.name)}</div>${sub ? `<div class="music-meta">${escapeHtml(sub)}</div>` : ''}</div>`;
       el.addEventListener('click', () => loadTrack(i));
       list.appendChild(el);
@@ -6980,6 +6984,7 @@ document.addEventListener('click', (e) => {
 const SoundService = {
   audioCtx: null,
   enabled: true,
+  wasPlaying: false,
   
   init() {
     try {
@@ -7507,6 +7512,18 @@ function toggleSound() {
   if (soundToggle) soundToggle.classList.toggle('muted', !enabled);
   if (soundIcon) soundIcon.setAttribute('data-lucide', enabled ? 'volume-2' : 'volume-x');
   refreshLucideIcons(soundToggle);
+  if (!enabled) {
+    SoundService.wasPlaying = false;
+    const radio = document.getElementById('wos-global-radio');
+    if (radio && !radio.paused) { radio.pause(); SoundService.wasPlaying = true; }
+    document.querySelectorAll('audio').forEach(a => { if (!a.paused) { a.pause(); SoundService.wasPlaying = true; } });
+  } else {
+    if (SoundService.wasPlaying) {
+      const radio = document.getElementById('wos-global-radio');
+      if (radio) radio.play().catch(() => {});
+      document.querySelectorAll('audio').forEach(a => a.play().catch(() => {}));
+    }
+  }
   if (enabled) SoundService.play('click');
 }
 

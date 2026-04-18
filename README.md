@@ -79,6 +79,14 @@ A refined web environment built with **Vanilla JavaScript** and **modern CSS3**.
 
 ---
 
+- [x] Task 1: Automatic Updates
+- [ ] Task 2: Functional Weather App
+- [ ] Task 3: Login Screen
+- [ ] Task 4: Ability to change Profile Pics
+- [ ] Task 5: More Languages
+
+---
+
 ## 📥 Installation
 
 Because this project uses Service Workers, it **must** be served over a local or remote server.
@@ -87,6 +95,9 @@ Because this project uses Service Workers, it **must** be served over a local or
 1. Go to the [Releases](https://github.com/samwelwayne266-coder/wayne-vault/releases) section on the right side of this page.
 2. Download the latest `.exe file`.
 3. ENJOY!!!!
+
+> [!NOTE]
+> WHEN RUNNING THE .EXE,IT WILL OPEN TWICE. WHEN IT OPENS THE FIRST TIME IT IS UPDATING.
 
 #### **Method B: Manual Download**
 1.  **Clone the Repository:**

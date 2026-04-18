@@ -79,10 +79,7 @@ A refined web environment built with **Vanilla JavaScript** and **modern CSS3**.
 
 ---
 
-- [x] Task 1: Automatic Updates
-- [ ] Task 2: Functional Weather App
-- [x] Task 3: Login Screen
-- [ ] Task 4: Functional Languages
+- [ ] Task : Functional Languages
 
 ---
 

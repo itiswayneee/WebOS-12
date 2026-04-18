@@ -88,9 +88,6 @@ Because this project uses Service Workers, it **must** be served over a local or
 2. Download the latest `.exe file`.
 3. ENJOY!!!!
 
-> [!NOTE]
-> WHEN RUNNING THE .EXE,IT IS RUN LOCALLY.
-
 #### **Method B: Manual Download**
 1.  **Clone the Repository:**
     ```bash

@@ -82,7 +82,13 @@ A refined web environment built with **Vanilla JavaScript** and **modern CSS3**.
 ## 📥 Installation
 
 Because this project uses Service Workers, it **must** be served over a local or remote server.
+    
+#### **Method A: The Release (Recommended)**
+1. Go to the [Releases](https://github.com/samwelwayne266-coder/wayne-vault/releases) section on the right side of this page.
+2. Download the latest `.exe file`.
+3. ENJOY!!!!
 
+#### **Method B: Manual Download**
 1.  **Clone the Repository:**
     ```bash
     git clone https://github.com/itiswayneee/webos-12.git
@@ -97,9 +103,6 @@ Because this project uses Service Workers, it **must** be served over a local or
     ```bash
     npm start / node server.js
     ```
-   **OR** 
-
-   Get the [latest RELEASE](https://github.com/itiswayneee/WebOS-12/releases/latest) .exe then ENJOY!!!!!
 
 ---
 

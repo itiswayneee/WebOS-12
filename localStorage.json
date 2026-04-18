@@ -18,8 +18,23 @@
     "/Music": {
       "type": "dir"
     },
-    "/Videos": {
-      "type": "dir"
+    "/Documents/Notes.txt": {
+      "type": "file",
+      "ext": "txt",
+      "content": "My Notes\n========\n\n- Learn WebOS\n- Try all the apps\n- Customize the wallpaper",
+      "modified": 1776381669400
+    },
+    "/Desktop/Readme.txt": {
+      "type": "file",
+      "ext": "txt",
+      "content": "Welcome to WebOS 12\n\nSYSTEM CONTROLS:\n- Double-click desktop icons to launch applications.\n- Use the Taskbar at the bottom to switch between open windows.\n- Click the Clock area to view the Notification Center.\n\nDEVELOPER TOOLS:\n- Open the \"Developer\" app to view system architecture and kernel stats.\n- Use the Terminal for low-level system commands.\n\nPRO TIPS:\n- You can install this OS as a PWA via your browser address bar.\n- Right-click (or long-press) may reveal additional context menus.\n\nEnjoy your refined web experience!",
+      "modified": 1776381669400
+    },
+    "/Documents/Welcome.txt": {
+      "type": "file",
+      "ext": "txt",
+      "content": "Welcome to WebOS 12!\n\nThis is your virtual file system.\nYou can create, edit, and delete files.\n\nEnjoy the experience!",
+      "modified": 1776381669400
     }
   }
 }

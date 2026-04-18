@@ -83,8 +83,6 @@ A refined web environment built with **Vanilla JavaScript** and **modern CSS3**.
 
 Because this project uses Service Workers, it **must** be served over a local or remote server.
 
-**A) OPTION A**
-
 1.  **Clone the Repository:**
     ```bash
     git clone https://github.com/itiswayneee/webos-12.git
@@ -99,11 +97,9 @@ Because this project uses Service Workers, it **must** be served over a local or
     ```bash
     npm start / node server.js
     ```
+   **OR** 
 
-**B) OPTION B**
-
-1.   Go to the [releases](https://github.com/itiswayneee/WebOS-12/releases) menu.
-2.   Get the [latest]((https://github.com/itiswayneee/WebOS-12/releases/latest) .exe then enjoy
+   Get the [latest RELEASE](https://github.com/itiswayneee/WebOS-12/releases/latest) .exe then ENJOY!!!!!
 
 ---
 
@@ -135,4 +131,4 @@ function renderApp(appId, container, winId, extra) {
 function renderApp-Name() {YOUR FUNCTIONS}
 ```
 ---
-## Developed with 💙 by the Wayne
+## Developed with 💙 by Wayne

@@ -305,6 +305,97 @@ if (!state.iconLayout || typeof state.iconLayout !== 'object') state.iconLayout 
 state.brightness = Math.round(Math.max(10, Math.min(100, Number(state.brightness) || 100)));
 state.notificationsEnabled = state.notificationsEnabled !== false;
 state.transparencyEnabled = state.transparencyEnabled !== false;
+
+/* €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
+   FIREBASE CONFIG                                                  
+€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ */
+const firebaseConfig = {
+  apiKey: "AIzaSyBfOtVWIMaZjyKGT3BTtljiADXEkrPE2qA",
+  authDomain: "webos-a4010.firebaseapp.com",
+  projectId: "webos-a4010",
+  storageBucket: "webos-a4010.firebasestorage.app",
+  messagingSenderId: "338821714456",
+  appId: "1:338821714456:web:e6bf9edcd6a901b875e96d"
+};
+
+let db = null;
+let currentUserEmail = null;
+let currentUserId = null;
+
+function initFirebase() {
+  console.log('Firebase loaded:', typeof firebase !== 'undefined');
+  if (typeof firebase === 'undefined') return;
+  try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    console.log('Firestore initialized:', !!db);
+  } catch (e) {
+    console.log('Firebase init error:', e);
+  }
+  
+  let storedId = localStorage.getItem('wos_user_id');
+  if (!storedId || !/^\d{3}$/.test(storedId)) {
+    storedId = String(Math.floor(Math.random() * 900) + 100);
+    localStorage.setItem('wos_user_id', storedId);
+  }
+  currentUserId = storedId;
+  console.log('User ID:', currentUserId);
+  
+  window.addEventListener('beforeunload', () => {
+    if (db && currentUserId) {
+      firebase.firestore().collection('chat_users').doc(currentUserId).delete();
+    }
+  });
+  
+  setupBackgroundListeners();
+}
+
+let bgListenersReady = false;
+
+function setupBackgroundListeners() {
+  if (!db || !currentUserId || bgListenersReady) return;
+  bgListenersReady = true;
+  
+  const bgUsername = (state && state.username) ? state.username.toLowerCase().replace(/\s/g, '') : 'user';
+  const bgEmail = bgUsername + '.' + currentUserId + '@webos';
+  
+  const lastNotifiedMailId = localStorage.getItem('last_notified_mail') || '';
+  const lastNotifiedChatId = localStorage.getItem('last_notified_chat') || '';
+  let initialMailLoaded = false;
+  let initialChatLoaded = false;
+  
+  const q = firebase.firestore().collection('mail').where('to', '==', bgEmail).where('unread', '==', true);
+  q.onSnapshot((snapshot) => {
+    if (!initialMailLoaded) {
+      initialMailLoaded = true;
+      return;
+    }
+    snapshot.docChanges().forEach((change) => {
+      if (change.type === 'added') {
+        const email = change.doc.data();
+        if (email.id !== lastNotifiedMailId) {
+          showNotification('Mail', `${email.from}: ${email.subject}`, 'mail');
+          localStorage.setItem('last_notified_mail', email.id);
+        }
+      }
+    });
+  });
+  
+  firebase.firestore().collection('chat_messages').orderBy('timestamp', 'desc').limit(1).onSnapshot((snapshot) => {
+    if (!initialChatLoaded) {
+      initialChatLoaded = true;
+      return;
+    }
+    if (!snapshot.empty) {
+      const lastMsg = snapshot.docs[0].data();
+      if (lastMsg.userId !== currentUserId && lastMsg.id !== lastNotifiedChatId) {
+        showNotification('Chat', `${lastMsg.user}: ${lastMsg.text}`, 'message-circle');
+        localStorage.setItem('last_notified_chat', lastMsg.id);
+      }
+    }
+  });
+}
+
 if (!isNewInstall) {
   state.username = (state.username && String(state.username).trim()) || 'User';
 }
@@ -698,10 +789,15 @@ function closeWin(id) {
   const win = windowsMap.get(id);
   if (!win) return;
   delete explorerRefreshers[id];
-  
+   
   // Call cleanup if app has one
   if (win.container && win.container._taskmgrCleanup) {
     win.container._taskmgrCleanup();
+  }
+  
+  // Cleanup chat user when closing chat window
+  if (win.app === 'chat' && db && currentUserId) {
+    firebase.firestore().collection('chat_users').doc(currentUserId).delete().catch(() => {});
   }
   
   if (typeof motion !== 'undefined') {
@@ -2542,33 +2638,78 @@ function renderVideo(container, winId) {
   loadVideos().then(renderVideoList);
 }
 
-/* €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
+/* €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
    MAIL
 €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ */
 let mailMessages = [];
 let userEmail = '';
+let mailUnsubscribe = null;
 
 async function initMail() {
-  try {
-    const res = await fetch(`/api/session?name=${encodeURIComponent(state.username || 'User')}&id=${state.sessionId}`);
-    const data = await res.json();
-    userEmail = data.email;
-    return data;
-  } catch (e) {
-    userEmail = 'user@webos.local';
-    return {};
+  let username = 'User';
+  if (state && state.username) {
+    username = state.username;
+  } else if (typeof state === 'undefined') {
+    username = 'user';
   }
+  username = username.toLowerCase().replace(/\s/g, '');
+  const uniqueNum = currentUserId || '001';
+  userEmail = username + '.' + uniqueNum + '@webos';
+  console.log('initMail - email:', userEmail);
+  return { email: userEmail };
 }
 
 async function loadMail(folder = 'inbox') {
+  if (!db) {
+    try {
+      const endpoint = folder === 'sent' ? '/api/mail/sent' : '/api/mail/inbox';
+      const res = await fetch(endpoint, {
+        headers: { 'X-User-Email': userEmail }
+      });
+      mailMessages = await res.json();
+      return mailMessages;
+    } catch (e) {
+      return [];
+    }
+  }
+  
+  if (mailUnsubscribe) {
+    mailUnsubscribe();
+    mailUnsubscribe = null;
+  }
+  
+  mailMessages = [];
+  const userId = userEmail;
+  
   try {
-    const endpoint = folder === 'sent' ? '/api/mail/sent' : '/api/mail/inbox';
-    const res = await fetch(endpoint, {
-      headers: { 'X-User-Email': userEmail }
+    const q = firebase.firestore().collection('mail')
+      .where(folder === 'sent' ? 'from' : 'to', '==', userId)
+      .orderBy('timestamp', 'desc');
+    
+    let lastMailCount = 0;
+    mailUnsubscribe = q.onSnapshot((snapshot) => {
+      const currentCount = snapshot.size;
+      if (currentCount > lastMailCount && lastMailCount > 0) {
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === 'added') {
+            const email = change.doc.data();
+            if (email.to === userEmail && email.unread) {
+              showNotification('Mail', `${email.from}: ${email.subject}`, 'mail');
+            }
+          }
+        });
+      }
+      lastMailCount = currentCount;
+      mailMessages = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (currentMailWinId && document.getElementById(`mail_list_${currentMailWinId}`)) {
+        renderMailList(folder);
+        updateMailCount();
+      }
     });
-    mailMessages = await res.json();
+    
     return mailMessages;
   } catch (e) {
+    console.log('Firestore mail query error:', e);
     return [];
   }
 }
@@ -2711,6 +2852,39 @@ function renderMail(container, winId) {
     if (!to || !subject) {
       showNotification('Mail', 'Please fill in recipient and subject', 'alert-circle');
       return;
+    }
+    
+    const from = userEmail;
+    const timestamp = firebase.firestore.FieldValue ? firebase.firestore.FieldValue.serverTimestamp() : Date.now();
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const dateStr = now.toLocaleDateString();
+    
+    if (db) {
+      try {
+        await firebase.firestore().collection('mail').add({
+          from: from,
+          to: to,
+          subject: subject,
+          body: body,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp ? firebase.firestore.FieldValue.serverTimestamp() : Date.now(),
+          time: timeStr,
+          date: dateStr,
+          unread: true
+        });
+        showNotification('Mail', 'Message sent!', 'check-circle');
+        document.getElementById(`mail_compose_overlay_${winId}`).style.display = 'none';
+        document.getElementById(`mail_to_${winId}`).value = '';
+        document.getElementById(`mail_subj_${winId}`).value = '';
+        document.getElementById(`mail_body_${winId}`).value = '';
+        currentFolder = 'sent';
+        container.querySelectorAll('.mail-folder').forEach(f => f.classList.remove('active'));
+        await loadMail('sent');
+        renderMailList('sent');
+        return;
+      } catch (e) {
+        console.log('Firebase mail error, falling back to API');
+      }
     }
     
     try {
@@ -2872,59 +3046,90 @@ async function installApp(appId, app) {
 
 /* €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
    CHAT
-€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ */
+€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ */
 function renderChat(container, winId) {
   let currentUser = state.username || 'User';
   let chatSocket = null;
   let chatUsers = [];
-  
-  const CHAT_MESSAGES_KEY = 'wos_chat_messages';
-  
-  function getStoredMessages() {
-    try {
-      return JSON.parse(localStorage.getItem(CHAT_MESSAGES_KEY)) || [];
-    } catch (e) { return []; }
-  }
-  
-  function saveMessage(msg) {
-    const messages = getStoredMessages();
-    const exists = messages.some(m => m.id === msg.id);
-    if (!exists) {
-      messages.push(msg);
-      localStorage.setItem(CHAT_MESSAGES_KEY, JSON.stringify(messages));
-    }
-  }
-  
-  function connectToChat() {
-    if (typeof io === 'undefined') {
-      console.log('Socket.io not loaded, using local chat');
+  let chatUnsubscribe = null;
+  let usersUnsubscribe = null;
+  let chatUserUnsub = null;
+  let chatUserDocId = null;
+  let lastLoadedMessages = [];
+   
+  async function connectToChat() {
+    chatUserDocId = currentUserId || 'user_' + Date.now();
+    currentUser = state.username || 'User';
+    
+    if (!db) {
+      if (typeof io === 'undefined') {
+        console.log('Socket.io not loaded, using local chat');
+        return;
+      }
+      chatSocket = io();
+      chatSocket.on('connect', () => {
+        chatSocket.emit('chat-join', { name: currentUser });
+      });
+      chatSocket.on('chat-users', (users) => {
+        const seen = new Set();
+        chatUsers = users.filter(u => {
+          if (seen.has(u.id)) return false;
+          seen.add(u.id);
+          return true;
+        });
+        renderChatUsers();
+      });
+      chatSocket.on('chat-message', (msg) => {
+        addMessageToChat(msg, true);
+      });
+      chatSocket.on('chat-user-left', (data) => {
+        showNotification('Chat', `${data.name} left the chat`, 'user-minus');
+      });
       return;
     }
     
-    chatSocket = io();
-    
-    chatSocket.on('connect', () => {
-      chatSocket.emit('chat-join', { name: currentUser });
-    });
-    
-    chatSocket.on('chat-users', (users) => {
-      const seen = new Set();
-      chatUsers = users.filter(u => {
-        if (seen.has(u.id)) return false;
-        seen.add(u.id);
-        return true;
+    try {
+      const messagesQuery = firebase.firestore().collection('chat_messages').orderBy('timestamp', 'desc');
+      
+      let lastChatCount = 0;
+      chatUnsubscribe = messagesQuery.onSnapshot((snapshot) => {
+        const currentCount = snapshot.size;
+        if (currentCount > lastChatCount && lastChatCount > 0) {
+          snapshot.docChanges().forEach((change) => {
+            if (change.type === 'added') {
+              const msg = { id: change.doc.id, ...change.doc.data() };
+              if (msg.userId !== chatUserDocId) {
+                addMessageToChat(msg, true);
+              }
+            }
+          });
+        } else {
+          snapshot.docs.forEach(d => {
+            const msg = { id: d.id, ...d.data() };
+            if (msg.userId !== chatUserDocId) {
+              addMessageToChat(msg, true);
+            }
+          });
+        }
+        lastChatCount = currentCount;
       });
-      renderChatUsers();
-    });
-    
-    chatSocket.on('chat-message', (msg) => {
-      saveMessage(msg);
-      addMessageToChat(msg, true);
-    });
-    
-    chatSocket.on('chat-user-left', (data) => {
-      showNotification('Chat', `${data.name} left the chat`, 'user-minus');
-    });
+      
+      chatUsers = [];
+      usersUnsubscribe = firebase.firestore().collection('chat_users').onSnapshot((snapshot) => {
+        chatUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderChatUsers();
+      });
+      
+      await firebase.firestore().collection('chat_users').doc(chatUserDocId).set({
+        name: currentUser,
+        userId: chatUserDocId,
+        online: true,
+        lastSeen: Date.now()
+      });
+      
+    } catch (e) {
+      console.log('Firebase chat error:', e);
+    }
   }
   
   function renderChatUsers() {
@@ -2942,7 +3147,7 @@ function renderChat(container, winId) {
       contactsEl.innerHTML = `
         <div style="padding:20px;text-align:center;color:var(--text-sec);font-size:12px">
           No other users online<br/>
-          <span style="color:var(--text-ter)">Share the server URL with others to chat</span>
+          <span style="color:var(--text-ter)">Users Online.</span>
         </div>`;
       return;
     }
@@ -2992,8 +3197,8 @@ function renderChat(container, winId) {
         <div class="chat-messages" id="chat_messages_${winId}">
           <div style="padding:20px;text-align:center;color:var(--text-sec);font-size:12px">
             Welcome to WebOS Chat!<br/>
-            Messages are shared with all users on the local network.<br/>
-            <span style="color:var(--text-ter)">Server must be running for real-time chat.</span>
+            Messages are shared with all users.<br/>
+            <span style="color:var(--text-ter)">Realtime Chat.</span>
           </div>
         </div>
         <div class="chat-input">
@@ -3010,22 +3215,43 @@ function renderChat(container, winId) {
   const sendBtn = document.getElementById(`chat_send_${winId}`);
   const messagesEl = document.getElementById(`chat_messages_${winId}`);
   const nameInput = document.getElementById(`chat_name_${winId}`);
-  const statusEl = document.getElementById(`chat_status_${winId}`);
-  
-  function sendMessage() {
+const statusEl = document.getElementById(`chat_status_${winId}`);
+   
+  if (statusEl) {
+    if (db) {
+      statusEl.textContent = 'Firebase Connected';
+      statusEl.style.color = '#4ade80';
+    } else {
+      statusEl.textContent = 'Local only (Firebase not connected)';
+      statusEl.style.color = '#f87171';
+    }
+  }
+   
+  async function sendMessage() {
     const text = input.value.trim();
     if (!text) return;
     
-    const msg = { user: currentUser, text, time: new Date().toLocaleTimeString(), id: Date.now() };
+    const msg = { user: currentUser, text, time: new Date().toLocaleTimeString(), id: Date.now(), userId: chatUserDocId };
     
-    saveMessage(msg);
+    addMessageToChat(msg, false);
     
-    // Only emit to socket, don't add locally - server will broadcast back
-    if (chatSocket && chatSocket.connected) {
+    if (db) {
+      console.log('Saving to Firestore:', { user: currentUser, text, userId: chatUserDocId });
+      try {
+        const chatMsgRef = await db.collection('chat_messages').add({
+          id: 'msg_' + Date.now(),
+          user: currentUser,
+          text: text,
+          time: new Date().toLocaleTimeString(),
+          timestamp: firebase.firestore.FieldValue ? firebase.firestore.FieldValue.serverTimestamp() : Date.now(),
+          userId: chatUserDocId
+        });
+        console.log('Message saved to Firestore!');
+      } catch (e) {
+        console.log('Firebase chat send error:', e);
+      }
+    } else if (chatSocket && chatSocket.connected) {
       chatSocket.emit('chat-message', { text, localId: msg.id });
-    } else {
-      // If no socket, add locally
-      addMessageToChat(msg, false);
     }
     
     input.value = '';
@@ -3045,18 +3271,12 @@ function renderChat(container, winId) {
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
   
-  function loadStoredMessages() {
-    const stored = getStoredMessages();
-    if (stored.length > 0) {
-      messagesEl.innerHTML = '';
-      stored.forEach(msg => addMessageToChat(msg, true));
-    }
+  function clearMessagesDisplay() {
+    messagesEl.innerHTML = '';
   }
   
   sendBtn.addEventListener('click', sendMessage);
   input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
-  
-  loadStoredMessages();
   
   nameInput.addEventListener('change', () => {
     currentUser = nameInput.value || 'User';
@@ -3897,7 +4117,7 @@ function renderSettings(container, winId) {
           <div class="settings-card">
             <div class="settings-row">
               <div class="sr-icon">${lucideIconHtml('monitor', 18)}</div>
-              <div class="sr-info"><div class="sr-title">WebOS 12</div><div class="sr-desc">Version: 1.6.0</div></div>
+              <div class="sr-info"><div class="sr-title">WebOS 12</div><div class="sr-desc">Version: 1.7.0</div></div>
             </div>
             <div class="settings-row">
               <div class="sr-icon">${lucideIconHtml('globe', 18)}</div>
@@ -5838,6 +6058,7 @@ function lockOS() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  initFirebase();
   // Set up lock screen handlers
   const lockInput = document.getElementById('lock-password');
   const lockBtn = document.getElementById('lock-unlock');

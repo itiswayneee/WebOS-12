@@ -30,6 +30,19 @@ const sessionId = Date.now().toString(36);
 const userEmail = `user@webos-${sessionId}.local`;
 console.log(`User email: ${userEmail}`);
 
+// List directory contents
+function listDir(dirPath, relativeTo = filesDir) {
+  const fullPath = path.join(filesDir, dirPath.replace(/^\//, ''));
+  if (!fs.existsSync(fullPath)) return [];
+  try {
+    return fs.readdirSync(fullPath, { withFileTypes: true }).map(item => ({
+      name: item.name,
+      isDirectory: item.isDirectory(),
+      path: '/' + path.relative(filesDir, path.join(fullPath, item.name)).replace(/\\/g, '/')
+    }));
+  } catch(e) { return []; }
+}
+
 // File functions
 function saveFileToFolder(filePath, content) {
   const fullPath = path.join(filesDir, filePath.replace(/\//g, path.sep));
@@ -78,6 +91,12 @@ app.get('/api/media', (req, res) => {
   const images = allFiles.filter(f => ['jpg','jpeg','png','gif','webp','svg','bmp'].includes(f.name.split('.').pop().toLowerCase()));
   const videos = allFiles.filter(f => ['mp4','webm','avi','mov','mkv'].includes(f.name.split('.').pop().toLowerCase()));
   res.json({ images, videos, all: allFiles });
+});
+
+app.get('/api/files/list', (req, res) => {
+  const dir = req.query.dir || '/';
+  const items = listDir(dir);
+  res.json({ items, currentPath: dir });
 });
 
 app.get('/api/files', (req, res) => {

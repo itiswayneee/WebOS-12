@@ -1617,58 +1617,88 @@ background: transparent !important;
       
       <p style="text-align:left;font-size:14px;color:rgba(255,255,255,0.7);margin-bottom:14px;display:flex;align-items:center;gap:8px"><i data-lucide="compass" style="width:16px;height:16px"></i> Select your region</p>
       
-      <div id="region-list" style="max-height:180px;overflow-y:auto;margin-bottom:32px;text-align:left">
-        <div class="region-option" data-region="us" data-tz="America/New_York" style="padding:14px 18px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:8px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
-          <span style="color:#fff;font-weight:500">United States</span>
-          <span style="font-size:12px;color:rgba(255,255,255,0.4)">Eastern Time</span>
-        </div>
-        <div class="region-option" data-region="uk" data-tz="Europe/London" style="padding:14px 18px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:8px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
-          <span style="color:#fff;font-weight:500">United Kingdom</span>
-          <span style="font-size:12px;color:rgba(255,255,255,0.4)">GMT</span>
-        </div>
-        <div class="region-option" data-region="eu" data-tz="Europe/Paris" style="padding:14px 18px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:8px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
-          <span style="color:#fff;font-weight:500">Europe</span>
-          <span style="font-size:12px;color:rgba(255,255,255,0.4)">Central European Time</span>
-        </div>
-        <div class="region-option" data-region="jp" data-tz="Asia/Tokyo" style="padding:14px 18px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:8px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
-          <span style="color:#fff;font-weight:500">Japan</span>
-          <span style="font-size:12px;color:rgba(255,255,255,0.4)">Japan Standard Time</span>
-        </div>
-        <div class="region-option" data-region="cn" data-tz="Asia/Shanghai" style="padding:14px 18px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:8px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
-          <span style="color:#fff;font-weight:500">China</span>
-          <span style="font-size:12px;color:rgba(255,255,255,0.4)">China Standard Time</span>
-        </div>
-        <div class="region-option" data-region="au" data-tz="Australia/Sydney" style="padding:14px 18px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:8px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
-          <span style="color:#fff;font-weight:500">Australia</span>
-          <span style="font-size:12px;color:rgba(255,255,255,0.4)">Australian Eastern Time</span>
-        </div>
-        <div class="region-option" data-region="in" data-tz="Asia/Kolkata" style="padding:14px 18px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:8px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
-          <span style="color:#fff;font-weight:500">India</span>
-          <span style="font-size:12px;color:rgba(255,255,255,0.4)">India Standard Time</span>
-        </div>
-        <div class="region-option" data-region="br" data-tz="America/Sao_Paulo" style="padding:14px 18px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:8px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
-          <span style="color:#fff;font-weight:500">Brazil</span>
-          <span style="font-size:12px;color:rgba(255,255,255,0.4)">Brasilia Time</span>
-        </div>
-        <div class="region-option" data-region="ca" data-tz="America/Toronto" style="padding:14px 18px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:8px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
-          <span style="color:#fff;font-weight:500">Canada</span>
-          <span style="font-size:12px;color:rgba(255,255,255,0.4)">Eastern Time</span>
-        </div>
-        <div class="region-option" data-region="fr" data-tz="Europe/Paris" style="padding:14px 18px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:8px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
-          <span style="color:#fff;font-weight:500">France</span>
-          <span style="font-size:12px;color:rgba(255,255,255,0.4)">Central European Time</span>
-        </div>
-        <div class="region-option" data-region="de" data-tz="Europe/Berlin" style="padding:14px 18px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:8px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
-          <span style="color:#fff;font-weight:500">Germany</span>
-          <span style="font-size:12px;color:rgba(255,255,255,0.4)">Central European Time</span>
-        </div>
-        <div class="region-option" data-region="es" data-tz="Europe/Madrid" style="padding:14px 18px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:8px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
-          <span style="color:#fff;font-weight:500">Spain</span>
-          <span style="font-size:12px;color:rgba(255,255,255,0.4)">Central European Time</span>
-        </div>
-        <div class="region-option" data-region="es" data-tz="East Africa" style="padding:14px 18px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:8px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
+      <div id="region-list" style="max-height:280px;overflow-y:auto;margin-bottom:32px;text-align:left">
+        <!-- Africa -->
+        <div style="padding:6px 12px;font-size:11px;font-weight:600;color:#60cdff;text-transform:uppercase;letter-spacing:0.5px;margin-top:8px">Africa</div>
+        <div class="region-option" data-region="east-africa" data-tz="Africa/Nairobi" style="padding:12px 18px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
           <span style="color:#fff;font-weight:500">East Africa</span>
-          <span style="font-size:12px;color:rgba(255,255,255,0.4)">East Africa Time</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.4)">UTC+3</span>
+        </div>
+        <div class="region-option" data-region="west-africa" data-tz="Africa/Lagos" style="padding:12px 18px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
+          <span style="color:#fff;font-weight:500">West Africa</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.4)">UTC+1</span>
+        </div>
+        <div class="region-option" data-region="south-africa" data-tz="Africa/Johannesburg" style="padding:12px 18px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
+          <span style="color:#fff;font-weight:500">Southern Africa</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.4)">UTC+2</span>
+        </div>
+        <div class="region-option" data-region="north-africa" data-tz="Africa/Cairo" style="padding:12px 18px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
+          <span style="color:#fff;font-weight:500">North Africa</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.4)">UTC+2</span>
+        </div>
+        
+        <!-- Europe -->
+        <div style="padding:6px 12px;font-size:11px;font-weight:600;color:#60cdff;text-transform:uppercase;letter-spacing:0.5px;margin-top:8px">Europe</div>
+        <div class="region-option" data-region="uk" data-tz="Europe/London" style="padding:12px 18px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
+          <span style="color:#fff;font-weight:500">United Kingdom</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.4)">GMT/UTC</span>
+        </div>
+        <div class="region-option" data-region="eu-central" data-tz="Europe/Paris" style="padding:12px 18px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
+          <span style="color:#fff;font-weight:500">Central Europe</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.4)">UTC+1</span>
+        </div>
+        <div class="region-option" data-region="eastern-europe" data-tz="Europe/Moscow" style="padding:12px 18px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
+          <span style="color:#fff;font-weight:500">Eastern Europe</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.4)">UTC+3</span>
+        </div>
+        
+        <!-- Asia -->
+        <div style="padding:6px 12px;font-size:11px;font-weight:600;color:#60cdff;text-transform:uppercase;letter-spacing:0.5px;margin-top:8px">Asia</div>
+        <div class="region-option" data-region="middle-east" data-tz="Asia/Riyadh" style="padding:12px 18px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
+          <span style="color:#fff;font-weight:500">Middle East</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.4)">UTC+3</span>
+        </div>
+        <div class="region-option" data-region="south-asia" data-tz="Asia/Kolkata" style="padding:12px 18px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
+          <span style="color:#fff;font-weight:500">South Asia</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.4)">UTC+5:30</span>
+        </div>
+        <div class="region-option" data-region="sea" data-tz="Asia/Bangkok" style="padding:12px 18px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
+          <span style="color:#fff;font-weight:500">Southeast Asia</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.4)">UTC+7</span>
+        </div>
+        <div class="region-option" data-region="east-asia" data-tz="Asia/Tokyo" style="padding:12px 18px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
+          <span style="color:#fff;font-weight:500">East Asia</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.4)">UTC+9</span>
+        </div>
+        
+        <!-- Americas -->
+        <div style="padding:6px 12px;font-size:11px;font-weight:600;color:#60cdff;text-transform:uppercase;letter-spacing:0.5px;margin-top:8px">Americas</div>
+        <div class="region-option" data-region="us-east" data-tz="America/New_York" style="padding:12px 18px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
+          <span style="color:#fff;font-weight:500">US Eastern</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.4)">UTC-5</span>
+        </div>
+        <div class="region-option" data-region="us-west" data-tz="America/Los_Angeles" style="padding:12px 18px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
+          <span style="color:#fff;font-weight:500">US Western</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.4)">UTC-8</span>
+        </div>
+        <div class="region-option" data-region="south-america" data-tz="America/Sao_Paulo" style="padding:12px 18px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
+          <span style="color:#fff;font-weight:500">South America</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.4)">UTC-3</span>
+        </div>
+        <div class="region-option" data-region="central-america" data-tz="America/Mexico_City" style="padding:12px 18px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
+          <span style="color:#fff;font-weight:500">Central America</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.4)">UTC-6</span>
+        </div>
+        
+        <!-- Oceania -->
+        <div style="padding:6px 12px;font-size:11px;font-weight:600;color:#60cdff;text-transform:uppercase;letter-spacing:0.5px;margin-top:8px">Oceania</div>
+        <div class="region-option" data-region="australia" data-tz="Australia/Sydney" style="padding:12px 18px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
+          <span style="color:#fff;font-weight:500">Australia (East)</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.4)">UTC+10</span>
+        </div>
+        <div class="region-option" data-region="new-zealand" data-tz="Pacific/Auckland" style="padding:12px 18px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);margin-bottom:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between">
+          <span style="color:#fff;font-weight:500">New Zealand</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.4)">UTC+12</span>
         </div>
       </div>
       
@@ -2188,9 +2218,37 @@ state.transparencyEnabled = state.transparencyEnabled !== false;
 if (!isNewInstall) {
   state.username = (state.username && String(state.username).trim()) || 'User';
 }
+state.timezone = state.timezone || 'Africa/Nairobi';
+state.region = state.region || 'east-africa';
 if (!Array.isArray(state.pinnedApps)) {
   state.pinnedApps = Object.keys(APPS).filter(id => APPS[id].pinned);
 }
+
+const TIMEZONE_DATA = {
+  'Africa/Nairobi': { offset: 3, name: 'EAT' },
+  'Africa/Lagos': { offset: 1, name: 'WAT' },
+  'Africa/Johannesburg': { offset: 2, name: 'SAST' },
+  'Africa/Cairo': { offset: 2, name: 'EET' },
+  'Europe/London': { offset: 0, name: 'GMT' },
+  'Europe/Paris': { offset: 1, name: 'CET' },
+  'Europe/Moscow': { offset: 3, name: 'MSK' },
+  'Europe/Berlin': { offset: 1, name: 'CET' },
+  'Europe/Madrid': { offset: 1, name: 'CET' },
+  'Asia/Riyadh': { offset: 3, name: 'AST' },
+  'Asia/Kolkata': { offset: 5.5, name: 'IST' },
+  'Asia/Bangkok': { offset: 7, name: 'ICT' },
+  'Asia/Tokyo': { offset: 9, name: 'JST' },
+  'Asia/Shanghai': { offset: 8, name: 'CST' },
+  'Asia/Dubai': { offset: 4, name: 'GST' },
+  'America/New_York': { offset: -5, name: 'EST' },
+  'America/Los_Angeles': { offset: -8, name: 'PST' },
+  'America/Sao_Paulo': { offset: -3, name: 'BRT' },
+  'America/Mexico_City': { offset: -6, name: 'CST' },
+  'America/Toronto': { offset: -5, name: 'EST' },
+  'America/Jamaica': { offset: -5, name: 'EST' },
+  'Australia/Sydney': { offset: 10, name: 'AEST' },
+  'Pacific/Auckland': { offset: 12, name: 'NZST' }
+};
 
 function saveState() { localStorage.setItem('wos_state', JSON.stringify(state)); }
 
@@ -3552,12 +3610,19 @@ function renderClock(container, winId) {
     const timeEl = document.getElementById(`clock_time_${winId}`);
     const dateEl = document.getElementById(`clock_date_${winId}`);
     if (!timeEl || !dateEl) return;
-    const now = new Date();
-    const h = now.getHours().toString().padStart(2, '0');
-    const m = now.getMinutes().toString().padStart(2, '0');
-    const s = now.getSeconds().toString().padStart(2, '0');
+    const tz = state.timezone || 'Africa/Nairobi';
+    const tzTime = getTimeInTimezone(tz);
+    
+    const h = tzTime.getUTCHours().toString().padStart(2, '0');
+    const m = tzTime.getUTCMinutes().toString().padStart(2, '0');
+    const s = tzTime.getUTCSeconds().toString().padStart(2, '0');
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const dayName = days[tzTime.getUTCDay()];
+    const monthName = months[tzTime.getUTCMonth()];
+    
     timeEl.textContent = `${h}:${m}:${s}`;
-    dateEl.textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    dateEl.textContent = `${dayName}, ${monthName} ${tzTime.getUTCDate()}`;
   }
 
   const WORLD_CLOCKS_KEY = 'wos_world_clocks';
@@ -3729,7 +3794,7 @@ function renderClock(container, winId) {
     const now = new Date();
     const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
     const cityTime = new Date(utc + (w.offset * 3600000));
-    return cityTime.getHours().toString().padStart(2, '0') + ':' + cityTime.getMinutes().toString().padStart(2, '0');
+    return cityTime.getUTCHours().toString().padStart(2, '0') + ':' + cityTime.getUTCMinutes().toString().padStart(2, '0');
   }
   
   window.removeWorldClock = function(index) {
@@ -4929,6 +4994,7 @@ function openFileDialog(winId, cb) {
    FILE EXPLORER
 €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ */
 function renderExplorer(container, winId, extra = {}) {
+  const driveLetter = state.drive || 'C';
   let cwd = extra.startPath || '/';
   let history = [cwd];
   let hIdx = 0;
@@ -4941,7 +5007,7 @@ function renderExplorer(container, winId, extra = {}) {
         <button type="button" class="ex-nav-btn" id="ex_back_${winId}" title="Back">${lucideIconHtml('chevron-left', 18)}</button>
         <button type="button" class="ex-nav-btn" id="ex_fwd_${winId}"  title="Forward">${lucideIconHtml('chevron-right', 18)}</button>
         <button type="button" class="ex-nav-btn" id="ex_up_${winId}"   title="Up">${lucideIconHtml('chevron-up', 18)}</button>
-        <input class="explorer-addr" id="ex_addr_${winId}" value="${cwd}" />
+        <input class="explorer-addr" id="ex_addr_${winId}" value="${driveLetter}:${cwd === '/' ? '\\' : ''}" />
       </div>
       <div class="explorer-body">
         <div class="explorer-sidebar" id="ex_sb_${winId}">
@@ -4953,7 +5019,7 @@ function renderExplorer(container, winId, extra = {}) {
           <div class="sb-item" data-path="/Music"><span class="sbi">${lucideIconHtml('music', 16)}</span> Music</div>
           <div class="sb-item" data-path="/Videos"><span class="sbi">${lucideIconHtml('video', 16)}</span> Videos</div>
           <div class="sidebar-section">This PC</div>
-          <div class="sb-item" data-path="/"><span class="sbi">${lucideIconHtml('hard-drive', 16)}</span> Local Disk (C:)</div>
+          <div class="sb-item" data-path="/"><span class="sbi">${lucideIconHtml('hard-drive', 16)}</span> Local Disk (${driveLetter}:)</div>
         </div>
         <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
           <div class="explorer-main" id="ex_main_${winId}">
@@ -4980,7 +5046,8 @@ function renderExplorer(container, winId, extra = {}) {
       history.push(cwd);
       hIdx = history.length - 1;
     }
-    document.getElementById(`ex_addr_${winId}`).value = cwd;
+    const displayPath = cwd === '/' ? driveLetter + ':\\' : driveLetter + ':\\' + cwd.replace(/\//g, '\\');
+    document.getElementById(`ex_addr_${winId}`).value = displayPath;
     document.getElementById(`ex_bc_${winId}`).textContent = cwd || '/';
     renderFiles();
     updateNav();
@@ -5469,9 +5536,9 @@ function renderSettings(container, winId) {
   const navItems = [
     { id:'system',       lucide:'monitor', label:'System' },
     { id:'personalize',  lucide:'palette', label:'Personalization' },
-    { id:'display',        lucide:'monitor-smartphone', label:'Display' },
-    { id:'apps',           lucide:'layout-grid', label:'Apps' },
-    { id:'about',          lucide:'info', label:'About' },
+    { id:'display',      lucide:'monitor-smartphone', label:'Display' },
+    { id:'apps',         lucide:'layout-grid', label:'Apps' },
+    { id:'about',        lucide:'info', label:'About' },
   ];
 
   container.innerHTML = `
@@ -5538,6 +5605,46 @@ function renderSettings(container, winId) {
             </div>
             <div class="accent-grid" id="ac_grid_${winId}"></div>
           </div>
+          <div class="settings-card">
+            <div class="settings-row">
+              <div class="sr-icon">${lucideIconHtml('globe', 18)}</div>
+              <div class="sr-info"><div class="sr-title">Timezone</div><div class="sr-desc" id="tz_current_${winId}">${TIMEZONE_DATA[state.timezone]?.name || 'EAT'} - UTC${TIMEZONE_DATA[state.timezone]?.offset >= 0 ? '+' : ''}${TIMEZONE_DATA[state.timezone]?.offset || 3}</div></div>
+            </div>
+            <div style="padding:12px 16px;">
+              <select id="tz_select_${winId}" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:14px;cursor:pointer">
+                <optgroup label="Africa">
+                  <option value="Africa/Nairobi" ${state.timezone === 'Africa/Nairobi' ? 'selected' : ''}>East Africa (UTC+3)</option>
+                  <option value="Africa/Lagos" ${state.timezone === 'Africa/Lagos' ? 'selected' : ''}>West Africa (UTC+1)</option>
+                  <option value="Africa/Johannesburg" ${state.timezone === 'Africa/Johannesburg' ? 'selected' : ''}>Southern Africa (UTC+2)</option>
+                  <option value="Africa/Cairo" ${state.timezone === 'Africa/Cairo' ? 'selected' : ''}>North Africa (UTC+2)</option>
+                </optgroup>
+                <optgroup label="Europe">
+                  <option value="Europe/London" ${state.timezone === 'Europe/London' ? 'selected' : ''}>United Kingdom (UTC+0)</option>
+                  <option value="Europe/Paris" ${state.timezone === 'Europe/Paris' ? 'selected' : ''}>Central Europe (UTC+1)</option>
+                  <option value="Europe/Moscow" ${state.timezone === 'Europe/Moscow' ? 'selected' : ''}>Eastern Europe (UTC+3)</option>
+                </optgroup>
+                <optgroup label="Asia">
+                  <option value="Asia/Riyadh" ${state.timezone === 'Asia/Riyadh' ? 'selected' : ''}>Middle East (UTC+3)</option>
+                  <option value="Asia/Kolkata" ${state.timezone === 'Asia/Kolkata' ? 'selected' : ''}>South Asia (UTC+5:30)</option>
+                  <option value="Asia/Bangkok" ${state.timezone === 'Asia/Bangkok' ? 'selected' : ''}>Southeast Asia (UTC+7)</option>
+                  <option value="Asia/Tokyo" ${state.timezone === 'Asia/Tokyo' ? 'selected' : ''}>East Asia (UTC+9)</option>
+                  <option value="Asia/Shanghai" ${state.timezone === 'Asia/Shanghai' ? 'selected' : ''}>China (UTC+8)</option>
+                  <option value="Asia/Dubai" ${state.timezone === 'Asia/Dubai' ? 'selected' : ''}>UAE (UTC+4)</option>
+                </optgroup>
+                <optgroup label="Americas">
+                  <option value="America/New_York" ${state.timezone === 'America/New_York' ? 'selected' : ''}>US Eastern (UTC-5)</option>
+                  <option value="America/Los_Angeles" ${state.timezone === 'America/Los_Angeles' ? 'selected' : ''}>US Western (UTC-8)</option>
+                  <option value="America/Sao_Paulo" ${state.timezone === 'America/Sao_Paulo' ? 'selected' : ''}>South America (UTC-3)</option>
+                  <option value="America/Mexico_City" ${state.timezone === 'America/Mexico_City' ? 'selected' : ''}>Central America (UTC-6)</option>
+                  <option value="America/Toronto" ${state.timezone === 'America/Toronto' ? 'selected' : ''}>Canada (UTC-5)</option>
+                </optgroup>
+                <optgroup label="Oceania">
+                  <option value="Australia/Sydney" ${state.timezone === 'Australia/Sydney' ? 'selected' : ''}>Australia (UTC+10)</option>
+                  <option value="Pacific/Auckland" ${state.timezone === 'Pacific/Auckland' ? 'selected' : ''}>New Zealand (UTC+12)</option>
+                </optgroup>
+              </select>
+            </div>
+          </div>
         </div>
 
         <!-- Display -->
@@ -5588,9 +5695,18 @@ function renderSettings(container, winId) {
               <div class="sr-icon">${lucideIconHtml('cpu', 18)}</div>
               <div class="sr-info"><div class="sr-title">Installed RAM</div><div class="sr-desc">8GB RAM</div></div>
             </div>
-<div class="settings-row">
+            <div class="settings-row">
               <div class="sr-icon">${lucideIconHtml('hard-drive', 18)}</div>
               <div class="sr-info"><div class="sr-title">Storage (${state.drive || 'C'}:)</div><div class="sr-desc">${state.storageSize || '256GB'} - ${Object.keys(FS).length} files stored</div></div>
+            </div>
+          </div>
+          <div class="settings-card" style="margin-top:16px;border:1px solid rgba(196,43,28,0.3)">
+            <div class="settings-row" style="border:none">
+              <div class="sr-icon" style="color:#f47174">${lucideIconHtml('alert-triangle', 18)}</div>
+              <div class="sr-info"><div class="sr-title" style="color:#f47174">Reset WebOS</div><div class="sr-desc">Delete all data and start fresh</div></div>
+              <div class="sr-ctrl">
+                <button type="button" id="factory_reset_${winId}" style="padding:8px 16px;border-radius:8px;background:rgba(196,43,28,0.15);color:#f47174;border:1px solid rgba(196,43,28,0.3);cursor:pointer;font-size:13px;font-weight:500">Reset</button>
+              </div>
             </div>
           </div>
         </div>
@@ -5641,6 +5757,26 @@ function renderSettings(container, winId) {
 
   const brEl = document.getElementById(`brightness_range_${winId}`);
   brEl.addEventListener('input', () => applyBrightness(brEl.value));
+
+  // Timezone change
+  const tzSelect = document.getElementById(`tz_select_${winId}`);
+  tzSelect.addEventListener('change', function() {
+    state.timezone = this.value;
+    saveState();
+    const tzData = TIMEZONE_DATA[this.value];
+    const tzDisplay = document.getElementById(`tz_current_${winId}`);
+    if (tzDisplay) tzDisplay.textContent = `${tzData.name} - UTC${tzData.offset >= 0 ? '+' : ''}${tzData.offset}`;
+    updateClock();
+  });
+
+  // Factory reset
+  document.getElementById(`factory_reset_${winId}`).addEventListener('click', function() {
+    if (confirm('Are you sure you want to reset WebOS?\n\nThis will delete ALL your data including:\n- Files\n- Settings\n- Installed apps\n\nThis action cannot be undone.')) {
+      localStorage.clear();
+      sessionStorage.clear();
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#000;color:#fff;font-family:system-ui;text-align:center;flex-direction:column;gap:20px"><h1 style="font-size:32px;font-weight:600">WebOS Reset</h1><p style="color:rgba(255,255,255,0.6)">All data has been cleared.</p><p style="color:rgba(255,255,255,0.4);font-size:14px">Close this tab or refresh to start fresh.</p></div>';
+    }
+  });
 
   container.querySelectorAll('.app-pin-tb').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -6928,14 +7064,29 @@ function showNotification(title, msg, iconName = 'bell') {
     }
   }, 4000);
 }
-
-/*                                                                
+/*
+                                                                  
    CLOCK
-                                                                */
-function updateClock() {
+                                                                   */
+function getTimeInTimezone(tz) {
+  const tzData = TIMEZONE_DATA[tz] || TIMEZONE_DATA['Africa/Nairobi'];
   const now = new Date();
-  document.getElementById('clock-time').textContent = now.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
-  document.getElementById('clock-date').textContent = now.toLocaleDateString([], { month:'short', day:'numeric' });
+  const utcTime = now.getTime();
+  return new Date(utcTime + (tzData.offset * 3600000));
+}
+
+function updateClock() {
+  const tz = state.timezone || 'Africa/Nairobi';
+  const tzTime = getTimeInTimezone(tz);
+  
+  const h = tzTime.getUTCHours().toString().padStart(2, '0');
+  const m = tzTime.getUTCMinutes().toString().padStart(2, '0');
+  const day = tzTime.getUTCDate();
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const month = months[tzTime.getUTCMonth()];
+  
+  document.getElementById('clock-time').textContent = `${h}:${m}`;
+  document.getElementById('clock-date').textContent = `${month} ${day}`;
 }
 
 setInterval(updateClock, 1000);
@@ -6943,7 +7094,7 @@ updateClock();
 
 /*                                                                
    ALT+TAB
-                                                                */
+                                                                 */
 let altTabOpen = false, altTabIdx = 0;
 const atOverlay = document.getElementById('alttab-overlay');
 const atBox     = document.getElementById('alttab-box');
@@ -7232,7 +7383,7 @@ function init() {
       selectedTimezone = opt.dataset.tz;
     });
   });
-  document.querySelector('.region-option[data-region="us"]').classList.add('selected');
+  document.querySelector('.region-option[data-region="east-africa"]').classList.add('selected');
   
   // Step 1.5 - Back
   document.getElementById('setup-step1-5-back').addEventListener('click', () => {

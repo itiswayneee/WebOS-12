@@ -89,7 +89,7 @@ Because this project uses Service Workers, it **must** be served over a local or
 3. ENJOY!!!!
 
 > [!NOTE]
-> WHEN RUNNING THE .EXE,IT WILL OPEN TWICE. WHEN IT OPENS THE FIRST TIME IT IS UPDATING.
+> WHEN RUNNING THE .EXE,IT IS RUN LOCALLY.
 
 #### **Method B: Manual Download**
 1.  **Clone the Repository:**

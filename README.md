@@ -79,10 +79,6 @@ A refined web environment built with **Vanilla JavaScript** and **modern CSS3**.
 
 ---
 
-- [ ] Task : Functional Languages
-
----
-
 ## 📥 Installation
 
 Because this project uses Service Workers, it **must** be served over a local or remote server.

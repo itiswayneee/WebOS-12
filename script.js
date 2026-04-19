@@ -4264,10 +4264,13 @@ function renderSettings(container, winId) {
   });
 
   // Factory reset
-  document.getElementById(`factory_reset_${winId}`).addEventListener('click', function() {
+  document.getElementById(`factory_reset_${winId}`).addEventListener('click', async function() {
     if (confirm('Are you sure you want to reset WebOS?\n\nThis will delete ALL your data including:\n- Files\n- Settings\n- Installed apps\n\nThis action cannot be undone.')) {
       localStorage.clear();
       sessionStorage.clear();
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map(c => caches.delete(c)));
+      await fetch('/api/reset', { method: 'POST' });
       document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#000;color:#fff;font-family:system-ui;text-align:center;flex-direction:column;gap:20px"><h1 style="font-size:32px;font-weight:600">WebOS Reset</h1><p style="color:rgba(255,255,255,0.6)">All data has been cleared.</p><p style="color:rgba(255,255,255,0.4);font-size:14px">Close this tab or refresh to start fresh.</p></div>';
     }
   });

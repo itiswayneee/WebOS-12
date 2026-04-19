@@ -4117,7 +4117,7 @@ function renderSettings(container, winId) {
           <div class="settings-card">
             <div class="settings-row">
               <div class="sr-icon">${lucideIconHtml('monitor', 18)}</div>
-              <div class="sr-info"><div class="sr-title">WebOS 12</div><div class="sr-desc">Version: 1.7.0</div></div>
+              <div class="sr-info"><div class="sr-title">WebOS 12</div><div class="sr-desc">Version: 2.0</div></div>
             </div>
             <div class="settings-row">
               <div class="sr-icon">${lucideIconHtml('globe', 18)}</div>
@@ -4933,28 +4933,52 @@ function syncRadioPillChrome() {
 
 async function fetchRadioStations(query) {
   const q = (query || '').trim();
-  const base = 'https://de1.api.radio-browser.info/json';
-  try {
-    let url = `${base}/stations/topvote/45`;
-    if (q.length >= 2) {
-      url = `${base}/stations/search?limit=45&order=votes&reverse=true&name=${encodeURIComponent(q)}`;
+  const mirrors = [
+    'https://de1.api.radio-browser.info/json',
+    'https://at1.api.radio-browser.info/json'
+  ];
+
+  // Modern tags that favor current hits over 90s classics
+  const trendingTags = 'rap,trap,charts,top40';
+
+  for (const base of mirrors) {
+    try {
+      let url;
+      if (q.length >= 2) {
+        url = `${base}/stations/search?limit=60&order=votes&reverse=true&name=${encodeURIComponent(q)}`;
+      } else {
+        // Querying by specific modern tags
+        url = `${base}/stations/bytag/rap?limit=60&order=votes&reverse=true`;
+      }
+
+      const r = await fetch(url);
+      if (!r.ok) continue;
+
+      const j = await r.json();
+      
+      return j
+        .filter(s => {
+          const name = (s.name || '').toLowerCase();
+          const tags = (s.tags || '').toLowerCase();
+          // FILTER: Exclude anything that smells like the 90s or "Old School"
+          const isOldies = name.includes('90s') || tags.includes('90s') || 
+                           name.includes('old school') || tags.includes('classic') ||
+                           tags.includes('oldies');
+          
+          return s.url && !s.hls && !isOldies;
+        })
+        .slice(0, 45)
+        .map(s => ({
+          name: (s.name || 'Station').replace(/[<>]/g, ''),
+          url: s.url_resolved || s.url,
+          country: s.countrycode || '',
+          tags: (s.tags || '').split(',').slice(0, 3).join(', '),
+        }));
+    } catch (e) {
+      continue;
     }
-    const r = await fetch(url, { headers: { 'User-Agent': 'WebOS12/1.0' } });
-    if (!r.ok) throw new Error('bad');
-    const j = await r.json();
-    if (!Array.isArray(j) || !j.length) throw new Error('empty');
-    return j
-      .filter(s => s.url && !s.hls)
-      .slice(0, 45)
-      .map(s => ({
-        name: (s.name || 'Station').replace(/</g, ''),
-        url: s.url_resolved || s.url,
-        country: s.country || '',
-        tags: (s.tags || '').split(',').slice(0, 3).join(', '),
-      }));
-  } catch (e) {
-    return RADIO_FALLBACK;
   }
+  return typeof RADIO_FALLBACK !== 'undefined' ? RADIO_FALLBACK : [];
 }
 
 function renderMusic(container, winId, extra = {}) {

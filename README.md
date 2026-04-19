@@ -17,7 +17,8 @@ A refined web environment built with **Vanilla JavaScript** and **modern CSS3**.
 
 ### Media & Creativity
 
-* **Music Player & Radio:** Integrated radio station search and a mini-player "pill" mode.
+* **Music Player & Radio:** Integrated radio & Music player.
+>SOME STATIONS MAY NOT WORK DUE TO WEB RESTRICTIONS
 
 * **Video Player:** Support for playing local video files with progress seeking and full-screen capability.
 

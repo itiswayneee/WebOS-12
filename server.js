@@ -5,39 +5,21 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
-const { app: electronApp } = require('electron'); // Import Electron
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { 
-  cors: { origin: "*", methods: ["GET", "POST"] } 
+  cors: { 
+    origin: "*", 
+    methods: ["GET", "POST"] 
+  } 
 });
 
 app.use(cors());
 app.use(express.json());
 
-// --- NEW PATH LOGIC START ---
-// This ensures your files save to C:\Users\User\AppData\Roaming\webos-12
-const userDataPath = electronApp.getPath('userData');
-const filesDir = path.join(userDataPath, 'files');
-const storagePath = path.join(userDataPath, 'localStorage.json');
-
-if (fs.existsSync(storagePath)) {
-    try {
-        let data = JSON.parse(fs.readFileSync(storagePath, 'utf8'));
-        
-        // Example: If Version 1.1 adds "settings", check for it
-        if (!data.settings) {
-            console.log("Migrating data: Adding default settings...");
-            data.settings = { theme: 'dark', notifications: true }; 
-            fs.writeFileSync(storagePath, JSON.stringify(data, null, 2));
-        }
-    } catch (e) {
-        console.error("Migration failed:", e);
-    }
-}
-
-// Create the writable directories if they don't exist
+// Files directory
+const filesDir = path.join(__dirname, 'files');
 ['Desktop', 'Documents', 'Pictures', 'Music', 'Downloads', 'Videos'].forEach(f => {
   const dir = path.join(filesDir, f);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
@@ -280,8 +262,9 @@ io.on('connection', (socket) => {
   });
 });
 
+// Save localStorage
 app.post('/api/localstorage/save', (req, res) => {
-  // Use storagePath (AppData) instead of __dirname
+  const storagePath = path.join(__dirname, 'localStorage.json');
   fs.writeFileSync(storagePath, JSON.stringify(req.body, null, 2));
   if (req.body['wos_fs']) {
     Object.keys(req.body['wos_fs']).forEach(k => { 
@@ -291,57 +274,26 @@ app.post('/api/localstorage/save', (req, res) => {
   res.json({ success: true });
 });
 
-app.post('/api/reset', (req, res) => {
-  try {
-    const dirsToClear = ['blob_storage', 'Cache', 'Code Cache', 'DawnGraphiteCache', 'DawnWebGPUCache', 'files', 'GPUCache', 'IndexedDB', 'Local Storage', 'Network', 'Service Worker', 'Session Storage', 'Shared Dictionary', 'WebStorage'];
-    dirsToClear.forEach(dir => {
-      const dirPath = path.join(userDataPath, dir);
-      if (fs.existsSync(dirPath)) {
-        fs.rmSync(dirPath, { recursive: true, force: true });
-      }
-    });
-    ['Desktop', 'Documents', 'Pictures', 'Music', 'Downloads', 'Videos'].forEach(f => {
-      fs.mkdirSync(path.join(filesDir, f), { recursive: true });
-    });
-    ['Cache_Data', 'No_Vary_Search'].forEach(f => {
-      fs.mkdirSync(path.join(userDataPath, 'Cache', f), { recursive: true });
-    });
-    ['js', 'wasm'].forEach(f => {
-      fs.mkdirSync(path.join(userDataPath, 'Code Cache', f, 'index-dir'), { recursive: true });
-    });
-    fs.mkdirSync(path.join(userDataPath, 'DawnGraphiteCache'), { recursive: true });
-    fs.mkdirSync(path.join(userDataPath, 'DawnWebGPUCache'), { recursive: true });
-    fs.mkdirSync(path.join(userDataPath, 'GPUCache'), { recursive: true });
-    fs.mkdirSync(path.join(userDataPath, 'IndexedDB', 'http_localhost_3000.indexeddb.leveldb'), { recursive: true });
-    fs.mkdirSync(path.join(userDataPath, 'Local Storage', 'leveldb'), { recursive: true });
-    fs.mkdirSync(path.join(userDataPath, 'Network'), { recursive: true });
-    fs.mkdirSync(path.join(userDataPath, 'Service Worker', 'Database'), { recursive: true });
-    fs.mkdirSync(path.join(userDataPath, 'Service Worker', 'ScriptCache', 'index-dir'), { recursive: true });
-    fs.mkdirSync(path.join(userDataPath, 'Session Storage'), { recursive: true });
-    fs.mkdirSync(path.join(userDataPath, 'Shared Dictionary', 'cache', 'index-dir'), { recursive: true });
-    fs.mkdirSync(path.join(userDataPath, 'WebStorage'), { recursive: true });
-    res.json({ success: true });
-  } catch (e) {
-    res.status(500).json({ success: false, error: e.message });
-  }
-});
-
-// This tells the server: "When someone asks for the root, give them Index.html"
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'Index.html'));
-});
-
-// Keep your existing static line below it
+// Static files
 app.use(express.static(__dirname));
 
-// UPDATE the Init logic at the bottom
-if (fs.existsSync(storagePath)) {
+// Init
+const storageFile = path.join(__dirname, 'localStorage.json');
+if (fs.existsSync(storageFile)) {
     try {
-        const localStorageData = JSON.parse(fs.readFileSync(storagePath, 'utf8'));
-        // ... (rest of your existing init logic)
-    } catch(e) { console.error(e); }
+        const localStorageData = JSON.parse(fs.readFileSync(storageFile, 'utf8'));
+        if (localStorageData && localStorageData['wos_fs']) {
+          Object.keys(localStorageData['wos_fs']).forEach(k => { 
+            if (localStorageData['wos_fs'][k].type === 'file') saveFileToFolder(k, localStorageData['wos_fs'][k].content || ''); 
+          });
+        }
+    } catch (e) { console.error("Initialization error:", e); }
 }
 
-server.listen(3000, () => {
-  console.log('Server running on port 3000');
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
+
+// Dynamic Port Handling for Deployment
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => console.log(`WebOS running on port ${PORT}`));

@@ -1,6 +1,6 @@
 {
   "name": "webos-12",
-  "version": "1.0.0",
+  "version": "2.2.0",
   "description": "WebOS 12 Server",
   "main": "server.js",
   "scripts": {

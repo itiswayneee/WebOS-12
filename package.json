@@ -1,7 +1,7 @@
 {
   "name": "webos-12",
   "version": "2.2.0",
-  "description": "WebOS 12 Server",
+  "description": "WebOS 12 is a custom web operating system.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

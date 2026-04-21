@@ -394,7 +394,7 @@ input, textarea { font-family: var(--font); }
 .start-user:hover { background: var(--surface-hover); }
 .user-avatar {
   width:32px; height:32px; border-radius:50%;
-  background: linear-gradient(135deg,#0078d4,#60cdff);
+  background: linear-gradient(135deg,var(--accent),var(--accent-light));
   display:flex; align-items:center; justify-content:center;
   font-size:15px; color:#fff; font-weight:700; flex-shrink:0;
 }
@@ -1483,6 +1483,13 @@ background: transparent !important;
 .notification-center.open { right: 0; animation: panelSlideIn 0.3s ease-out; }
 .nc-header { display: flex; justify-content: space-between; margin-bottom: 16px; font-weight: 600; flex-shrink: 0; }
 
+#wos-modal { animation: modalFadeIn 0.15s ease-out; }
+@keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+#wos-modal-content { animation: modalSlideIn 0.2s ease-out; }
+@keyframes modalSlideIn { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+#wos-modal-btn-cancel:hover { background: var(--surface-hover); }
+#wos-modal-btn-confirm:hover { filter: brightness(1.1); }
+
 @keyframes panelSlideIn { from { transform: translateX(16px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 @keyframes ncItemIn { from { transform: translateX(12px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
@@ -1542,6 +1549,177 @@ background: transparent !important;
   border-radius: 3px;
   background: linear-gradient(90deg, var(--accent), var(--accent-light));
   animation: bootShimmer 1.1s ease-in-out infinite;
+}
+.boot-hint {
+  margin-top: 32px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  animation: bootHintFadeIn 0.5s ease forwards 1.5s;
+}
+@keyframes bootHintFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+#boot-menu.hidden { display: none !important; }
+.boot-menu-item:hover,
+.boot-menu-item.selected { background: rgba(255,255,255,0.08); }
+.boot-menu-item.selected { background: rgba(96,205,255,0.15); }
+
+/* BIOS Screen */
+#boot-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 100001;
+  background: #0a0a12;
+  color: #60cdff;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  user-select: none;
+}
+.bios-header {
+  padding: 8px 16px;
+  background: linear-gradient(90deg, #0d1a2e, #121a30);
+  border-bottom: 1px solid #203050;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.bios-logo-area {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.bios-mobo {
+  font-size: 24px;
+  font-weight: 700;
+  color: #60cdff;
+  letter-spacing: 2px;
+}
+.bios-ver {
+  font-size: 12px;
+  color: #4080a0;
+}
+.bios-copyright {
+  font-size: 10px;
+  color: #305070;
+}
+.bios-main {
+  display: flex;
+  height: calc(100vh - 50px);
+}
+.bios-sidebar {
+  width: 180px;
+  background: rgba(0,20,40,0.8);
+  border-right: 1px solid #203050;
+  padding: 20px 0;
+}
+.bios-nav-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.1s;
+  color: #4080a0;
+}
+.bios-nav-item:hover,
+.bios-nav-item.selected {
+  color: #60cdff;
+  background: rgba(96,205,255,0.1);
+}
+.bios-nav-item.selected .bios-key {
+  visibility: visible;
+}
+.bios-key {
+  visibility: hidden;
+  margin-right: 6px;
+}
+.bios-content {
+  flex: 1;
+  padding: 20px;
+}
+.bios-panel {
+  animation: biosFadeIn 0.15s ease;
+}
+@keyframes biosFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.bios-panel-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #60cdff;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #203050;
+}
+.bios-table {
+  background: rgba(0,20,40,0.5);
+  border: 1px solid #203050;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.bios-row {
+  display: flex;
+  border-bottom: 1px solid #152030;
+}
+.bios-row:last-child {
+  border-bottom: none;
+}
+.bios-label {
+  width: 220px;
+  padding: 10px 16px;
+  background: rgba(0,10,20,0.5);
+  color: #4080a0;
+}
+.bios-value {
+  flex: 1;
+  padding: 10px 16px;
+  color: #60cdff;
+  display: flex;
+  align-items: center;
+}
+.bios-editable,
+.bios-toggle {
+  cursor: pointer;
+  background: rgba(96,205,255,0.1);
+  border-radius: 2px;
+  padding: 4px 8px;
+  margin: 2px 0;
+}
+.bios-editable:hover,
+.bios-toggle:hover {
+  background: rgba(96,205,255,0.2);
+}
+.bios-panel-footer {
+  margin-top: 20px;
+  padding: 8px 16px;
+  background: rgba(0,20,40,0.5);
+  border: 1px solid #203050;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #4080a0;
+}
+.bios-exit-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 400px;
+}
+.bios-exit-item {
+  padding: 12px 20px;
+  cursor: pointer;
+  border: 1px solid #203050;
+  border-radius: 4px;
+  background: rgba(0,20,40,0.5);
+  transition: all 0.15s;
+}
+.bios-exit-item:hover,
+.bios-exit-item.selected {
+  background: rgba(96,205,255,0.15);
+  border-color: #60cdff;
+}
+.bios-exit-item.recovery-option:hover,
+.bios-exit-item.recovery-option.selected {
+  background: rgba(239,68,68,0.2);
+  border-color: #ef4444;
 }
 @keyframes bootPop {
   from { opacity: 0; transform: translateY(12px) scale(0.96); }

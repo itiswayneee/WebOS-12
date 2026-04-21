@@ -21,11 +21,142 @@
 </head>
 <body>
 
-<div id="boot-overlay" aria-hidden="true">
+<div id="boot-overlay">
   <div class="boot-inner">
     <div class="boot-logo">12</div>
     <div class="boot-tagline">Web OS</div>
     <div class="boot-bar"><span></span></div>
+    <div class="boot-hint">Press DELETE to open boot options</div>
+  </div>
+</div>
+
+<div id="boot-menu" style="display:none">
+  <div class="bios-header">
+    <div class="bios-logo-area">
+      <div class="bios-mobo">WebOS BIOS</div>
+      <div class="bios-ver">v2.0</div>
+    </div>
+    <div class="bios-copyright">Copyright © 2024 WebOS Corporation</div>
+  </div>
+  
+  <div class="bios-main">
+    <div class="bios-sidebar">
+      <div class="bios-nav-item selected" data-panel="main"><span class="bios-key">►</span> Main</div>
+      <div class="bios-nav-item" data-panel="advanced"><span class="bios-key">►</span> Advanced</div>
+      <div class="bios-nav-item" data-panel="exit"><span class="bios-key">►</span> Exit</div>
+    </div>
+    
+    <div class="bios-content">
+      <!-- Main Panel - System Info -->
+      <div class="bios-panel" id="bios-panel-main">
+        <div class="bios-panel-title">System Information</div>
+        <div class="bios-table">
+          <div class="bios-row">
+            <div class="bios-label">BIOS Version</div>
+            <div class="bios-value">WebOS BIOS 2.0.12</div>
+          </div>
+          <div class="bios-row">
+            <div class="bios-label">BIOS Date</div>
+            <div class="bios-value">04/15/2026</div>
+          </div>
+          <div class="bios-row">
+            <div class="bios-label">CPU Type</div>
+            <div class="bios-value" id="bios-cpu">WebOS Virtual CPU</div>
+          </div>
+          <div class="bios-row">
+            <div class="bios-label">Memory Size</div>
+            <div class="bios-value" id="bios-mem">8192 MB</div>
+          </div>
+          <div class="bios-row">
+            <div class="bios-label">System Date</div>
+            <div class="bios-value" id="bios-date">Tue 04/21/2026</div>
+          </div>
+          <div class="bios-row">
+            <div class="bios-label">System Time</div>
+            <div class="bios-value" id="bios-time">00:00:00</div>
+          </div>
+        </div>
+        <div class="bios-panel-footer">↑↓ = Navigate</div>
+      </div>
+      
+      <!-- Advanced Panel -->
+      <div class="bios-panel" id="bios-panel-advanced" style="display:none">
+        <div class="bios-panel-title">Advanced BIOS Settings</div>
+        <div class="bios-table">
+          <div class="bios-row">
+            <div class="bios-label">OS Theme</div>
+            <div class="bios-value bios-toggle" id="bios-theme" data-option="theme">[Dark]</div>
+          </div>
+          <div class="bios-row">
+            <div class="bios-label">Desktop Wallpaper</div>
+            <div class="bios-value bios-editable" id="bios-wallpaper" data-option="wallpaper">[Horizon]</div>
+          </div>
+          <div class="bios-row">
+            <div class="bios-label">Accent Color</div>
+            <div class="bios-value bios-editable" id="bios-accent">[Blue]</div>
+          </div>
+          <div class="bios-row">
+            <div class="bios-label">Transparency Effects</div>
+            <div class="bios-value bios-toggle" id="bios-transparency">[Enabled]</div>
+          </div>
+          <div class="bios-row">
+            <div class="bios-label">Notifications</div>
+            <div class="bios-value bios-toggle" id="bios-notifications">[Enabled]</div>
+          </div>
+          <div class="bios-row">
+            <div class="bios-label">Clock Format</div>
+            <div class="bios-value bios-editable" id="bios-clockfmt">[24-hour]</div>
+          </div>
+          <div class="bios-row">
+            <div class="bios-label">Date Format</div>
+            <div class="bios-value bios-editable" id="bios-datefmt">[MM/DD/YYYY]</div>
+          </div>
+          <div class="bios-row">
+            <div class="bios-label">Quick Boot</div>
+            <div class="bios-value bios-toggle" id="bios-quick">[Enabled]</div>
+          </div>
+          <div class="bios-row">
+            <div class="bios-label">Secure Boot</div>
+            <div class="bios-value bios-toggle" id="bios-secure" data-option="secureBoot">[Disabled]</div>
+          </div>
+          <div class="bios-row">
+            <div class="bios-label">Intel VT-d</div>
+            <div class="bios-value bios-toggle" id="bios-vtd" data-option="vtD">[Disabled]</div>
+          </div>
+          <div class="bios-row">
+            <div class="bios-label">System Volume</div>
+            <div class="bios-value bios-editable" id="bios-volume">[80%]</div>
+          </div>
+          <div class="bios-row">
+            <div class="bios-label">Auto-play Media</div>
+            <div class="bios-value bios-toggle" id="bios-autoplay">[Enabled]</div>
+          </div>
+          <div class="bios-row">
+            <div class="bios-label">Boot Device</div>
+            <div class="bios-value bios-editable" id="bios-boot1">[WebOS Drive]</div>
+          </div>
+          <div class="bios-row">
+            <div class="bios-label">Boot Sound</div>
+            <div class="bios-value bios-toggle" id="bios-bootsound">[Enabled]</div>
+          </div>
+        </div>
+        <div class="bios-panel-footer">Enter = Toggle/Select  ↑↓ = Navigate  F10 = Save</div>
+      </div>
+      
+      <!-- Exit Panel -->
+      <div class="bios-panel" id="bios-panel-exit" style="display:none">
+        <div class="bios-panel-title">Exit BIOS</div>
+        <div class="bios-exit-options">
+          <div class="bios-exit-item selected" data-action="continue"><span class="bios-key">►</span> Continue Boot</div>
+          <div class="bios-exit-item" data-action="save-restart"><span class="bios-key">►</span> Save Changes &amp; Restart</div>
+          <div class="bios-exit-item" data-action="discard-restart"><span class="bios-key">►</span> Discard Changes &amp; Restart</div>
+          <div class="bios-exit-item" data-action="reset-bios"><span class="bios-key">►</span> Reset BIOS Settings</div>
+          <div class="bios-exit-item recovery-option" data-action="recovery"><span class="bios-key">►</span> Enter Recovery Mode</div>
+          <div class="bios-exit-item" data-action="restart"><span class="bios-key">►</span> Restart</div>
+        </div>
+        <div class="bios-panel-footer">Enter = Select  Esc = Cancel</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -355,6 +486,21 @@
   </div>
   <div id="nc-list" class="nc-list">
     <div class="nc-empty">No new notifications</div>
+  </div>
+</div>
+
+<!-- Custom Modal Dialog -->
+<div id="wos-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:999999;align-items:center;justify-content:center">
+  <div id="wos-modal-content" style="background:var(--surface);border-radius:12px;padding:24px;min-width:320px;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,0.4);border:1px solid var(--border)">
+    <div id="wos-modal-title" style="font-size:18px;font-weight:600;margin-bottom:12px;color:var(--text)"></div>
+    <div id="wos-modal-message" style="font-size:14px;color:var(--text-ter);margin-bottom:20px;line-height:1.5"></div>
+    <div id="wos-modal-input-container" style="display:none;margin-bottom:20px">
+      <input type="text" id="wos-modal-input" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:14px;box-sizing:border-box">
+    </div>
+    <div id="wos-modal-buttons" style="display:flex;gap:10px;justify-content:flex-end">
+      <button id="wos-modal-btn-cancel" style="padding:8px 16px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-size:14px">Cancel</button>
+      <button id="wos-modal-btn-confirm" style="padding:8px 16px;border-radius:6px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:14px;font-weight:500">OK</button>
+    </div>
   </div>
 </div>
 

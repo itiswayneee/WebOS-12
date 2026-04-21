@@ -46,13 +46,92 @@ const WALLPAPERS = [
   { name:'Ocean',       bg:'linear-gradient(135deg,#005c97 0%,#363795 100%)' },
   { name:'Rose',        bg:'linear-gradient(135deg,#f953c6 0%,#b91d73 100%)' },
   { name:'Carbon',      bg:'linear-gradient(180deg,#18181b 0%,#0a0a0b 100%)' },
+  { name:'Volcano',    bg:'linear-gradient(160deg,#8b0000 0%,#ff4500 50%,#2f1f0f 100%)' },
+  { name:'Arctic',     bg:'linear-gradient(160deg,#e8f4f8 0%,#a8d8ea 50%,#d0e8f0 100%)' },
+  { name:'Midnight',   bg:'linear-gradient(135deg,#0f0c29 0%,#302b63 50%,#24243e 100%)' },
+  { name:'Mint',       bg:'linear-gradient(135deg,#134e4a 0%,#44bfaa 100%)' },
+  { name:'Peach',      bg:'linear-gradient(135deg,#ffecd2 0%,#fcb69f 100%)' },
+  { name:'Lavender',   bg:'linear-gradient(135deg,#e6e9f0 0%,#c9d6ff 100%)' },
+  { name:'Ember',     bg:'linear-gradient(160deg,#232526 0%,#414345 50%,#181a1b 100%)' },
+  { name:'Candy',     bg:'linear-gradient(160deg,#ff9a9e 0%,#fecfef 50%,#fad0c4 100%)' },
+  { name:'Matrix',     bg:'linear-gradient(180deg,#0d1f0d 0%,#0a330a 50%,#051505 100%)' },
 ];
 
-const ACCENT_COLORS = ['#0078d4','#8764b8','#567c34','#ca5010','#008b8b','#c43e1c','#69797e','#038387'];
+const ACCENT_COLORS = [
+  '#0078d4','#8764b8','#567c34','#ca5010','#008b8b','#c43e1c','#69797e','#038387',
+  '#e74856','#ff8c00','#00b294','#6b69de','#a426a4','#d1342a','#e3008c','#567c34'
+];
+
+/*                                                                
+   CUSTOM MODAL DIALOG
+                                                                 */
+function showModal(options) {
+  return new Promise(function(resolve) {
+    var modal = document.getElementById('wos-modal');
+    var title = document.getElementById('wos-modal-title');
+    var message = document.getElementById('wos-modal-message');
+    var inputContainer = document.getElementById('wos-modal-input-container');
+    var input = document.getElementById('wos-modal-input');
+    var btnCancel = document.getElementById('wos-modal-btn-cancel');
+    var btnConfirm = document.getElementById('wos-modal-btn-confirm');
+    
+    title.textContent = options.title || '';
+    message.textContent = options.message || '';
+    
+    if (options.input) {
+      inputContainer.style.display = 'block';
+      input.value = options.defaultValue || '';
+      input.placeholder = options.placeholder || '';
+    } else {
+      inputContainer.style.display = 'none';
+    }
+    
+    if (options.cancelText) btnCancel.textContent = options.cancelText;
+    if (options.confirmText) btnConfirm.textContent = options.confirmText;
+    
+    if (options.danger) {
+      btnConfirm.style.background = '#c42b1c';
+    } else {
+      btnConfirm.style.background = '';
+    }
+    
+    modal.style.display = 'flex';
+    if (options.input) {
+      setTimeout(function() { input.focus(); input.select(); }, 50);
+    }
+    
+    function cleanup() {
+      modal.style.display = 'none';
+      btnCancel.onclick = null;
+      btnConfirm.onclick = null;
+      input.onkeydown = null;
+    }
+    
+    btnCancel.onclick = function() {
+      cleanup();
+      resolve(null);
+    };
+    
+    btnConfirm.onclick = function() {
+      cleanup();
+      resolve(options.input ? input.value : true);
+    };
+    
+    input.onkeydown = function(e) {
+      if (e.key === 'Enter') {
+        cleanup();
+        resolve(input.value);
+      } else if (e.key === 'Escape') {
+        cleanup();
+        resolve(null);
+      }
+    };
+  });
+}
 
 /*                                                                
    VIRTUAL FILE SYSTEM
-                                                                */
+                                                                 */
 let FS = JSON.parse(localStorage.getItem('wos_fs') || 'null') || {
   '/': { type:'dir' },
   '/Desktop':  { type:'dir' },
@@ -455,6 +534,11 @@ function applyTransparency() {
 function updateUsernameUI() {
   const el = document.getElementById('start-username');
   if (el) el.textContent = state.username;
+  
+  const avatarEl = document.querySelector('.user-avatar');
+  if (avatarEl && state.username) {
+    avatarEl.textContent = state.username.charAt(0).toUpperCase();
+  }
 }
 
 function launchOrFocusApp(appId) {
@@ -515,6 +599,13 @@ function applyAccent(color) {
   state.accent = color;
   document.documentElement.style.setProperty('--accent', color);
   document.documentElement.style.setProperty('--accent-hover', color);
+  
+  // Create lighter accent for gradients
+  var r = parseInt(color.slice(1,3), 16);
+  var g = parseInt(color.slice(3,5), 16);
+  var b = parseInt(color.slice(5,7), 16);
+  var lighter = 'rgba(' + Math.min(255, r + 60) + ',' + Math.min(255, g + 60) + ',' + Math.min(255, b + 60) + ',0.8)';
+  document.documentElement.style.setProperty('--accent-light', lighter);
   saveState();
 }
 
@@ -3381,8 +3472,8 @@ function renderNotepad(container, winId, extra = {}) {
   });
 }
 
-function saveAsDialog(winId, ta, cb) {
-  const name = prompt('Save as:', 'document.txt');
+async function saveAsDialog(winId, ta, cb) {
+  const name = await showModal({title: 'Save as', message: 'Enter file name', input: true, defaultValue: 'document.txt', confirmText: 'Save', cancelText: 'Cancel'});
   if (!name) return;
   const p = fsCreate('/Documents', name, 'file', ta.value);
   if (!p) { fsWrite('/Documents/' + name, ta.value); }
@@ -3391,10 +3482,10 @@ function saveAsDialog(winId, ta, cb) {
   if (cb) cb('/Documents/' + name);
 }
 
-function openFileDialog(winId, cb) {
+async function openFileDialog(winId, cb) {
   const files = [...fsListDir('/Documents'), ...fsListDir('/Desktop')].filter(f => f.type === 'file');
   const names = files.map(f => f.name).join('\n');
-  const choice = prompt('Open file (type name):\n\n' + names);
+  const choice = await showModal({title: 'Open file', message: 'Type name:\n\n' + names, input: true, defaultValue: '', confirmText: 'Open', cancelText: 'Cancel'});
   if (!choice) return;
   const f = files.find(x => x.name.toLowerCase() === choice.toLowerCase());
   if (f) cb({ path:f.path, name:f.name, content:FS[f.path]?.content || '' });
@@ -3788,16 +3879,16 @@ function renderExplorer(container, winId, extra = {}) {
   explorerRefreshers[winId] = () => renderFiles();
 
   // Right-click on empty area
-  document.getElementById(`ex_main_${winId}`).addEventListener('contextmenu', e => {
+  document.getElementById(`ex_main_${winId}`).addEventListener('contextmenu', async e => {
     if (e.target.closest('.file-item,.fl-item')) return;
     e.preventDefault();
     showContextMenu(e.clientX, e.clientY, [
-      { lucide: 'folder-plus', label: 'New Folder', action: () => {
-        const n = prompt('Folder name:', 'New Folder');
+      { lucide: 'folder-plus', label: 'New Folder', action: async () => {
+        const n = await showModal({title: 'New Folder', message: 'Enter folder name', input: true, defaultValue: 'New Folder', confirmText: 'Create', cancelText: 'Cancel'});
         if (n) { fsCreate(cwd, n, 'dir'); renderFiles(); }
       }},
-      { lucide: 'file-plus', label: 'New Text File', action: () => {
-        const n = prompt('File name:', 'New Text.txt');
+      { lucide: 'file-plus', label: 'New Text File', action: async () => {
+        const n = await showModal({title: 'New Text File', message: 'Enter file name', input: true, defaultValue: 'New Text.txt', confirmText: 'Create', cancelText: 'Cancel'});
         if (n) { fsCreate(cwd, n, 'file', ''); renderFiles(); }
       }},
       { lucide: 'upload', label: 'Upload Files', action: () => {
@@ -3844,8 +3935,8 @@ function showFileContextMenu(x, y, f, winId, refresh, loadServerFilesFn) {
   const items = [
     { lucide: f.type === 'dir' ? 'folder-open' : 'file-text', label: 'Open', action: handleOpen },
     { sep: true },
-    { lucide: 'pencil', label: 'Rename', action: () => {
-      const n = prompt('Rename to:', f.name);
+    { lucide: 'pencil', label: 'Rename', action: async () => {
+      const n = await showModal({title: 'Rename', message: 'Enter new name', input: true, defaultValue: f.name, confirmText: 'Rename', cancelText: 'Cancel'});
       if (n && n !== f.name) { 
         if (isServerFile) {
           fetch('/api/file/rename', {
@@ -4226,7 +4317,7 @@ function renderSettings(container, winId) {
 
       // If turning ON, ask for password confirmation
       if (this.checked) {
-        const confirmed = prompt('Enter password to enable lock on startup:');
+        const confirmed = await showModal({title: 'Lock', message: 'Enter password to enable lock on startup', input: true, defaultValue: '', confirmText: 'Enable', cancelText: 'Cancel'});
         if (confirmed !== state.password) {
           this.checked = false;
           showNotification('Settings', 'Incorrect password', 'alert-circle');
@@ -4265,7 +4356,8 @@ function renderSettings(container, winId) {
 
   // Factory reset
   document.getElementById(`factory_reset_${winId}`).addEventListener('click', async function() {
-    if (confirm('Are you sure you want to reset WebOS?\n\nThis will delete ALL your data including:\n- Files\n- Settings\n- Installed apps\n\nThis action cannot be undone.')) {
+    const confirmed = await showModal({title: 'Confirm Reset', message: 'Are you sure you want to reset WebOS?\n\nThis will delete ALL your data including:\n- Files\n- Settings\n- Installed apps\n\nThis action cannot be undone.', confirmText: 'Yes', cancelText: 'No', danger: true});
+    if (confirmed) {
       localStorage.clear();
       sessionStorage.clear();
       const cacheNames = await caches.keys();
@@ -4439,9 +4531,9 @@ function renderTerminal(container, winId) {
       if (FS[p].type === 'dir') { addLine(`cat: ${args[0]}: Is a directory`, 'err'); return; }
       addLine(FS[p].content || '(empty file)');
     },
-    write: (args) => {
+    write: async (args) => {
       if (!args[0]) { addLine('write: missing filename', 'err'); return; }
-      const content = prompt(`Content for "${args[0]}":`);
+      const content = await showModal({title: 'Write File', message: `Content for "${args[0]}":`, input: true, defaultValue: '', confirmText: 'Write', cancelText: 'Cancel'});
       if (content === null) return;
       const p = normPath(termCwd + '/' + args[0]);
       if (FS[p]) fsWrite(p, content);
@@ -4763,7 +4855,7 @@ function renderPaint(container, winId) {
   });
 
   // Toolbar controls
-  container.querySelector('#pt_tb_' + winId).addEventListener('click', e => {
+  container.querySelector('#pt_tb_' + winId).addEventListener('click', async e => {
     const toolBtn = e.target.closest('[data-tool]');
     const colorBtn = e.target.closest('[data-color]');
     if (toolBtn) {
@@ -4778,7 +4870,8 @@ function renderPaint(container, winId) {
       curColor = colorBtn.dataset.color;
     }
     if (e.target.closest(`#pt_clear_${winId}`)) {
-      if (confirm('Clear canvas?')) { ctx.fillStyle='#fff'; ctx.fillRect(0,0,canvas.width,canvas.height); }
+      const confirmed = await showModal({title: 'Clear Canvas', message: 'Are you sure you want to clear the canvas?', confirmText: 'Yes', cancelText: 'No'});
+      if (confirmed) { ctx.fillStyle='#fff'; ctx.fillRect(0,0,canvas.width,canvas.height); }
     }
     if (e.target.closest(`#pt_save_${winId}`)) {
       const a = document.createElement('a');
@@ -5242,12 +5335,12 @@ document.getElementById('desktop').addEventListener('contextmenu', e => {
     { lucide: 'refresh-cw', label: 'Refresh', action: () => { buildDesktopIcons(); showNotification('Desktop', 'Desktop refreshed', 'refresh-cw'); } },
     { lucide: 'arrow-down-wide-narrow', label: 'Sort by name', action: () => showNotification('Desktop', 'Items sorted', 'check') },
     { sep: true },
-    { lucide: 'file-plus', label: 'New Text File', action: () => {
-      const n = prompt('File name:', 'New File.txt');
+    { lucide: 'file-plus', label: 'New Text File', action: async () => {
+      const n = await showModal({title: 'New Text File', message: 'Enter file name', input: true, defaultValue: 'New File.txt', confirmText: 'Create', cancelText: 'Cancel'});
       if (n) { fsCreate('/Desktop', n, 'file', ''); showNotification('Desktop', `Created: ${n}`, 'file-text'); }
     }},
-    { lucide: 'folder-plus', label: 'New Folder', action: () => {
-      const n = prompt('Folder name:', 'New Folder');
+    { lucide: 'folder-plus', label: 'New Folder', action: async () => {
+      const n = await showModal({title: 'New Folder', message: 'Enter folder name', input: true, defaultValue: 'New Folder', confirmText: 'Create', cancelText: 'Cancel'});
       if (n) { fsCreate('/Desktop', n, 'dir'); showNotification('Desktop', `Created: ${n}`, 'folder'); }
     }},
     { sep: true },
@@ -5601,14 +5694,35 @@ function updateClock() {
   const tz = state.timezone || 'Africa/Nairobi';
   const tzTime = getTimeInTimezone(tz);
   
-  const h = tzTime.getUTCHours().toString().padStart(2, '0');
+  var h = tzTime.getUTCHours();
   const m = tzTime.getUTCMinutes().toString().padStart(2, '0');
   const day = tzTime.getUTCDate();
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const month = months[tzTime.getUTCMonth()];
   
-  document.getElementById('clock-time').textContent = `${h}:${m}`;
-  document.getElementById('clock-date').textContent = `${month} ${day}`;
+  // Check clock format setting
+  var clockFmt = window.clockFormat || '24-hour';
+  var ampm = '';
+  if (clockFmt === '12-hour') {
+    ampm = h >= 12 ? ' PM' : ' AM';
+    h = h % 12;
+    if (h === 0) h = 12;
+  }
+  var hStr = h.toString().padStart(2, '0');
+  
+  document.getElementById('clock-time').textContent = hStr + ':' + m + ampm;
+  
+  // Check date format setting
+  var dateFmt = window.dateFormat || 'MM/DD/YYYY';
+  var dateStr = '';
+  if (dateFmt === 'DD/MM/YYYY') {
+    dateStr = day.toString().padStart(2, '0') + ' ' + month;
+  } else if (dateFmt === 'YYYY-MM-DD') {
+    dateStr = tzTime.getUTCFullYear() + '-' + (tzTime.getUTCMonth() + 1).toString().padStart(2, '0') + '-' + day.toString().padStart(2, '0');
+  } else {
+    dateStr = month + ' ' + day;
+  }
+  document.getElementById('clock-date').textContent = dateStr;
 }
 
 setInterval(updateClock, 1000);
@@ -5691,10 +5805,778 @@ document.addEventListener('keydown', e => {
 });
 
 /*                                                                
-   INITIALIZE
-                                                                */
+   INITIALIZE                                                              
+*/
+let bootComplete = false;
+
+// BIOS navigation state
+var biosFocus = 'sidebar'; // 'sidebar' or 'content'
+var biosSidebarIndex = 0;
+var biosContentIndex = 0;
+
+// Global boot key handler - use capture
+document.addEventListener('keydown', function(e) {
+  // Delete key is keyCode 46 - open BIOS
+  if (e.key === 'Delete' || e.code === 'Delete' || e.keyCode === 46) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    window.biosWasOpened = true;
+    
+    var bootMenu = document.getElementById('boot-menu');
+    var bootOverlay = document.getElementById('boot-overlay');
+    
+    biosFocus = 'sidebar';
+    biosSidebarIndex = 0;
+    biosContentIndex = 0;
+    
+    if (bootOverlay) bootOverlay.style.display = 'none';
+    if (bootMenu) {
+      bootMenu.style.display = 'block';
+      bootMenu.classList.add('visible');
+      refreshLucideIcons(bootMenu);
+      updateBiosClock();
+      updateBiosPanel('main');
+      updateBiosNavigation();
+      
+      // Sync current wallpaper
+      var wallpaperEl = document.getElementById('bios-wallpaper');
+      if (wallpaperEl && typeof state.wallpaper === 'number') {
+        wallpaperEl.textContent = '[' + WALLPAPERS[state.wallpaper].name + ']';
+      }
+      
+      // Sync current accent color
+      var accentEl = document.getElementById('bios-accent');
+      if (accentEl && state.accent) {
+        var accentNames = { '#0078d4':'Blue', '#8764b8':'Purple', '#567c34':'Green', '#ca5010':'Orange', '#008b8b':'Teal', '#c43e1c':'Red', '#69797e':'Gray', '#038387':'Cyan', '#e74856':'Pink', '#ff8c00':'Yellow', '#00b294':'Mint', '#6b69de':'Indigo', '#a426a4':'Magenta', '#d1342a':'Crimson', '#e3008c':'HotPink' };
+        var accentName = accentNames[state.accent] || 'Blue';
+        accentEl.textContent = '[' + accentName + ']';
+      }
+    }
+    return;
+  }
+  
+  // Escape key is keyCode 27 - close BIOS
+  if (e.keyCode === 27) {
+    var bootMenu = document.getElementById('boot-menu');
+    if (bootMenu && bootMenu.style.display === 'block') {
+      bootMenu.style.display = 'none';
+      var bootOverlay = document.getElementById('boot-overlay');
+      if (bootOverlay) bootOverlay.style.display = '';
+    }
+  }
+  
+  // BIOS keyboard navigation
+  var bootMenu = document.getElementById('boot-menu');
+  if (bootMenu && bootMenu.style.display === 'block') {
+    var currentPanel = document.querySelector('.bios-nav-item.selected');
+    var panelName = currentPanel ? currentPanel.dataset.panel : 'main';
+    
+    // Right arrow - move to content
+    if (e.keyCode === 39) {
+      e.preventDefault();
+      if (biosFocus === 'sidebar') {
+        biosFocus = 'content';
+        biosContentIndex = 0;
+        updateBiosNavigation();
+      }
+      return;
+    }
+    
+    // Left arrow - move to sidebar
+    if (e.keyCode === 37) {
+      e.preventDefault();
+      if (biosFocus === 'content') {
+        biosFocus = 'sidebar';
+        biosSidebarIndex = 0;
+        updateBiosNavigation();
+      }
+      return;
+    }
+    
+    // Helper: get currently visible panel name
+    function getVisiblePanelName() {
+      var panels = ['main', 'advanced', 'boot', 'exit'];
+      for (var i = 0; i < panels.length; i++) {
+        var panel = document.getElementById('bios-panel-' + panels[i]);
+        if (panel) {
+          var display = panel.style.display;
+          // Empty string or 'block' means visible
+          if (display === '' || display === 'block') {
+            return panels[i];
+          }
+        }
+      }
+      return 'main';
+    }
+    
+    // Down arrow
+    if (e.keyCode === 40) {
+      e.preventDefault();
+      if (biosFocus === 'sidebar') {
+        biosSidebarIndex = (biosSidebarIndex + 1) % 4;
+        updateBiosNavigation();
+      } else {
+        var currentPanel = getVisiblePanelName();
+        var contentRows = getBiosContentRows(currentPanel);
+        if (contentRows.length > 0) {
+          biosContentIndex = (biosContentIndex + 1) % contentRows.length;
+          highlightBiosContentRow(currentPanel, biosContentIndex);
+        }
+      }
+      return;
+    }
+    
+    // Up arrow
+    if (e.keyCode === 38) {
+      e.preventDefault();
+      if (biosFocus === 'sidebar') {
+        biosSidebarIndex = (biosSidebarIndex - 1 + 4) % 4;
+        updateBiosNavigation();
+      } else {
+        var currentPanel = getVisiblePanelName();
+        var contentRows = getBiosContentRows(currentPanel);
+        if (contentRows.length > 0) {
+          biosContentIndex = (biosContentIndex - 1 + contentRows.length) % contentRows.length;
+          highlightBiosContentRow(currentPanel, biosContentIndex);
+        }
+      }
+      return;
+    }
+    
+    // Enter key
+    if (e.keyCode === 13) {
+      e.preventDefault();
+      if (biosFocus === 'sidebar') {
+        var sidebarItems = document.querySelectorAll('.bios-nav-item');
+        if (sidebarItems[biosSidebarIndex]) {
+          sidebarItems[biosSidebarIndex].click();
+          biosContentIndex = 0;
+        }
+      } else {
+        // Use currently visible panel
+        var currentPanelName = getVisiblePanelName();
+        var contentRows = getBiosContentRows(currentPanelName);
+        if (contentRows[biosContentIndex]) {
+          var clickable = contentRows[biosContentIndex].querySelector('.bios-toggle, .bios-editable');
+          if (clickable) clickable.click();
+        }
+      }
+      return;
+    }
+    
+    // F10 - save settings
+    if (e.keyCode === 120) {
+      e.preventDefault();
+      saveBiosSettings();
+      showNotification('BIOS', 'Settings saved successfully', 'save');
+    }
+  }
+}, true);
+
+// Get content rows for a panel
+function getBiosContentRows(panelName) {
+  var panel = document.getElementById('bios-panel-' + panelName);
+  if (!panel) return [];
+  return Array.from(panel.querySelectorAll('.bios-row'));
+}
+
+// Highlight a content row
+function highlightBiosContentRow(panelName, index) {
+  // Clear all highlights first
+  var allPanels = document.querySelectorAll('.bios-panel');
+  allPanels.forEach(function(p) {
+    var rows = p.querySelectorAll('.bios-row');
+    rows.forEach(function(r) {
+      r.style.outline = 'none';
+    });
+  });
+  
+  // Highlight the selected row
+  var contentRows = getBiosContentRows(panelName);
+  contentRows.forEach(function(row, i) {
+    row.style.outline = (i === index) ? '2px solid #60cdff' : 'none';
+  });
+}
+
+// Update BIOS navigation visuals
+function updateBiosNavigation() {
+  // Update sidebar
+  var sidebarItems = document.querySelectorAll('.bios-nav-item');
+  sidebarItems.forEach(function(item, i) {
+    item.classList.toggle('selected', i === biosSidebarIndex && biosFocus === 'sidebar');
+    item.style.background = (i === biosSidebarIndex && biosFocus === 'sidebar') ? 'rgba(96,205,255,0.2)' : '';
+  });
+  
+  // Update content highlight
+  var currentPanel = document.querySelector('.bios-nav-item.selected');
+  var panelName = currentPanel ? currentPanel.dataset.panel : 'main';
+  var contentRows = getBiosContentRows(panelName);
+  contentRows.forEach(function(row, i) {
+    row.style.outline = (i === biosContentIndex && biosFocus === 'content') ? '2px solid #60cdff' : 'none';
+  });
+}
+
+// Reset all content row highlights
+function clearBiosContentHighlight() {
+  var allPanels = document.querySelectorAll('.bios-panel');
+  allPanels.forEach(function(panel) {
+    var rows = panel.querySelectorAll('.bios-row');
+    rows.forEach(function(row) {
+      row.style.outline = 'none';
+    });
+  });
+}
+
+var biosClockInterval;
+function updateBiosClock() {
+  clearInterval(biosClockInterval);
+  function tick() {
+    var now = new Date();
+    var dateStr = now.toLocaleDateString('en-US', { weekday: 'short', month: '2-digit', day: '2-digit', year: 'numeric' }).replace(/,/g, '').replace(/ /g, ' ');
+    var timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    var dateEl = document.getElementById('bios-date');
+    var timeEl = document.getElementById('bios-time');
+    if (dateEl) dateEl.textContent = dateStr.toUpperCase();
+    if (timeEl) timeEl.textContent = timeStr;
+  }
+  tick();
+  biosClockInterval = setInterval(tick, 1000);
+}
+
+// BIOS editing state
+var biosEditing = null;
+var biosEditValue = '';
+
+async function startBiosEdit(fieldId, type) {
+  var field = document.getElementById(fieldId);
+  if (!field) return;
+  
+  var currentValue = field.textContent.trim();
+  var input = await showModal({title: 'Edit ' + type, message: 'Enter ' + type + ':', input: true, defaultValue: currentValue, confirmText: 'OK', cancelText: 'Cancel'});
+  if (input === null || input === currentValue) return;
+  
+  field.textContent = input;
+  showNotification('BIOS', type + ' updated to ' + input, 'save');
+}
+
+function updateBiosPanel(panelName) {
+  const biosNavItems = document.querySelectorAll('.bios-nav-item');
+  const biosPanels = document.querySelectorAll('.bios-panel');
+  
+  // Clear all highlights first
+  clearBiosContentHighlight();
+  biosContentIndex = 0;
+  
+  biosNavItems.forEach(item => {
+    item.classList.toggle('selected', item.dataset.panel === panelName);
+  });
+  biosPanels.forEach(panel => {
+    panel.style.display = panel.id === 'bios-panel-' + panelName ? '' : 'none';
+  });
+  
+  // Update content highlight for new panel
+  setTimeout(function() {
+    highlightBiosContentRow(panelName, 0);
+  }, 10);
+}
+
+// Global save BIOS settings function
+function saveBiosSettings() {
+  function getToggleValue(id) {
+    var el = document.getElementById(id);
+    if (!el) return false;
+    return el.textContent.indexOf('Enabled') !== -1 || el.textContent.indexOf('UEFI') !== -1;
+  }
+  
+  var themeEl = document.getElementById('bios-theme');
+    var wallpaperEl = document.getElementById('bios-wallpaper');
+    var accentEl = document.getElementById('bios-accent');
+    var transparencyEl = document.getElementById('bios-transparency');
+    var notificationsEl = document.getElementById('bios-notifications');
+    var clockFmtEl = document.getElementById('bios-clockfmt');
+    var dateFmtEl = document.getElementById('bios-datefmt');
+    var volumeEl = document.getElementById('bios-volume');
+    var autoplayEl = document.getElementById('bios-autoplay');
+    
+    function getEditableValue(id) {
+      var el = document.getElementById(id);
+      return el ? el.textContent.slice(1, -1) : '';
+    }
+    
+    var settings = {
+    date: document.getElementById('bios-date').textContent,
+    time: document.getElementById('bios-time').textContent,
+    theme: themeEl ? (themeEl.textContent.indexOf('Dark') !== -1 ? 'Dark' : 'Light') : 'Dark',
+    wallpaper: wallpaperEl ? wallpaperEl.textContent.slice(1, -1) : 'Horizon',
+    accent: accentEl ? accentEl.textContent.slice(1, -1) : 'Blue',
+    transparency: getToggleValue('bios-transparency'),
+    notifications: getToggleValue('bios-notifications'),
+    clockFormat: clockFmtEl ? clockFmtEl.textContent.slice(1, -1) : '24-hour',
+    dateFormat: dateFmtEl ? dateFmtEl.textContent.slice(1, -1) : 'MM/DD/YYYY',
+    volume: volumeEl ? volumeEl.textContent.slice(1, -1) : '80%',
+    autoplay: getToggleValue('bios-autoplay'),
+    virtualization: getToggleValue('bios-virt'),
+    secureBoot: getToggleValue('bios-secure'),
+    fastBoot: getToggleValue('bios-fast'),
+    usbSupport: getToggleValue('bios-usb'),
+    pxeBoot: getToggleValue('bios-pxe'),
+    legacySupport: getToggleValue('bios-legacy'),
+    hyperThreading: getToggleValue('bios-ht'),
+    vtD: getToggleValue('bios-vtd'),
+    bootMode: document.getElementById('bios-bootmode')?.textContent.indexOf('UEFI') !== -1 ? 'UEFI' : 'Legacy',
+    quickBoot: getToggleValue('bios-quick'),
+    boot1: document.getElementById('bios-boot1')?.textContent,
+    boot2: document.getElementById('bios-boot2')?.textContent,
+    boot3: document.getElementById('bios-boot3')?.textContent,
+    bootSound: getToggleValue('bios-bootsound'),
+    numLock: getToggleValue('bios-numlock'),
+    saved: true,
+    savedAt: Date.now()
+  };
+  localStorage.setItem('wos_bios', JSON.stringify(settings));
+  return settings;
+}
+
+// Global load BIOS settings function
+function loadBiosSettings() {
+  try {
+    var saved = localStorage.getItem('wos_bios');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch (e) {}
+  return null;
+}
+
+// Apply BIOS settings to WebOS - only when BIOS was opened
+function applyBiosSettings() {
+  if (!window.biosWasOpened) return false;
+  var settings = loadBiosSettings();
+  if (!settings) return false;
+  
+  // Apply theme
+  if (settings.theme) {
+    var themeValue = settings.theme === 'Light' ? 'light' : 'dark';
+    applyTheme(themeValue);
+    var themeEl = document.getElementById('bios-theme');
+    if (themeEl) themeEl.textContent = '[' + settings.theme + ']';
+  }
+  
+  // Apply wallpaper
+  if (settings.wallpaper && typeof WALLPAPERS !== 'undefined') {
+    var wpIndex = WALLPAPERS.findIndex(function(w) { return w.name === settings.wallpaper; });
+    if (wpIndex >= 0) {
+      applyWallpaper(wpIndex);
+      var wallpaperEl = document.getElementById('bios-wallpaper');
+      if (wallpaperEl) wallpaperEl.textContent = '[' + settings.wallpaper + ']';
+    }
+  }
+  
+  // Apply accent color
+  if (settings.accent) {
+    var accentMap = { 
+      'Blue': '#0078d4', 'Purple': '#8764b8', 'Green': '#567c34', 'Orange': '#ca5010', 
+      'Teal': '#008b8b', 'Red': '#c43e1c', 'Gray': '#69797e', 'Cyan': '#038387',
+      'Pink': '#e74856', 'Yellow': '#ff8c00', 'Mint': '#00b294', 'Indigo': '#6b69de',
+      'Magenta': '#a426a4', 'Crimson': '#d1342a', 'HotPink': '#e3008c', 'Lime': '#567c34'
+    };
+    if (accentMap[settings.accent]) {
+      applyAccent(accentMap[settings.accent]);
+      var accentEl = document.getElementById('bios-accent');
+      if (accentEl) accentEl.textContent = '[' + settings.accent + ']';
+    }
+  }
+  
+  // Apply transparency
+  if (settings.transparency !== undefined) {
+    if (settings.transparency) {
+      document.documentElement.classList.remove('reduce-transparency');
+    } else {
+      document.documentElement.classList.add('reduce-transparency');
+    }
+  }
+  
+  // Store boot sound setting
+  window.biosBootSoundEnabled = settings.bootSound !== false;
+  
+  // Store fast boot setting
+  window.biosFastBootEnabled = settings.fastBoot !== false;
+  
+  // Store clock/date format
+  if (settings.clockFormat) window.clockFormat = settings.clockFormat;
+  if (settings.dateFormat) window.dateFormat = settings.dateFormat;
+  
+  // Apply volume
+  if (settings.volume) {
+    var vol = parseInt(settings.volume);
+    window.systemVolume = vol / 100;
+  }
+  
+  // Apply notifications setting
+  if (settings.notifications !== undefined) {
+    state.notificationsEnabled = settings.notifications;
+  }
+  
+  // Update BIOS UI elements
+  var uiElements = {
+    'bios-transparency': settings.transparency ? 'Enabled' : 'Disabled',
+    'bios-notifications': settings.notifications ? 'Enabled' : 'Disabled',
+    'bios-autoplay': settings.autoplay ? 'Enabled' : 'Disabled',
+    'bios-clockfmt': settings.clockFormat || '24-hour',
+    'bios-datefmt': settings.dateFormat || 'MM/DD/YYYY',
+    'bios-volume': settings.volume || '80%'
+  };
+  for (var id in uiElements) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = '[' + uiElements[id] + ']';
+  }
+  
+  return true;
+}
+
+// Add click handlers for BIOS navigation
+function setupBiosHandlers() {
+  var biosNavItems = document.querySelectorAll('.bios-nav-item');
+  biosNavItems.forEach(function(item) {
+    item.addEventListener('click', function() {
+      updateBiosPanel(item.dataset.panel);
+    });
+  });
+  
+  // Reset biosWasOpened on normal boot (when boot overlay finishes)
+  setTimeout(function() {
+    window.biosWasOpened = false;
+  }, 5000);
+  
+  // Discard BIOS settings to defaults
+  function discardBiosSettings() {
+    updateBiosClock();
+    var bootMenu = document.getElementById('boot-menu');
+    if (bootMenu) {
+      bootMenu.style.display = 'none';
+      var bootOverlay = document.getElementById('boot-overlay');
+      if (bootOverlay) bootOverlay.style.display = '';
+    }
+    location.reload();
+  }
+  
+  // Recovery mode - full system reset
+  function runRecoveryMode() {
+    var bootMenu = document.getElementById('boot-menu');
+    if (bootMenu) {
+      bootMenu.style.display = 'none';
+    }
+    
+    var recoveryEl = document.createElement('div');
+    recoveryEl.id = 'recovery-screen';
+    recoveryEl.style.cssText = 'position:fixed;inset:0;background:#0a0a12;z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#60cdff;font-family:monospace';
+    recoveryEl.innerHTML = 
+      '<div style="font-size:28px;margin-bottom:30px">WebOS Recovery</div>' +
+      '<div style="width:400px;height:20px;background:rgba(96,205,255,0.2);border-radius:4px;overflow:hidden;margin-bottom:20px">' +
+        '<div id="recovery-progress" style="width:0%;height:100%;background:linear-gradient(90deg,#0078d4,#60cdff);transition:width 0.3s"></div>' +
+      '</div>' +
+      '<div id="recovery-status" style="color:#4080a0;font-size:14px">Preparing recovery...</div>';
+    document.body.appendChild(recoveryEl);
+    
+    var progress = 0;
+    var statusMsgs = [
+      'Clearing file system...',
+      'Resetting system state...',
+      'Clearing user data...',
+      'Preparing fresh installation...',
+      'Recovery complete!'
+    ];
+    
+    var recoveryInterval = setInterval(function() {
+      progress += 20;
+      var progressBar = document.getElementById('recovery-progress');
+      var statusEl = document.getElementById('recovery-status');
+      if (progressBar) progressBar.style.width = progress + '%';
+      if (statusEl && statusMsgs[Math.floor(progress / 25)]) {
+        statusEl.textContent = statusMsgs[Math.floor(progress / 25)];
+      }
+      
+      if (progress >= 100) {
+        clearInterval(recoveryInterval);
+        setTimeout(function() {
+          localStorage.removeItem('wos_fs');
+          localStorage.removeItem('wos_state');
+          localStorage.removeItem('wos_recycle');
+          localStorage.removeItem('wos_installed_apps');
+          localStorage.removeItem('wos_bios');
+          localStorage.removeItem('wos_user_id');
+          location.reload();
+        }, 1000);
+      }
+    }, 500);
+  }
+  
+  var biosExitItems = document.querySelectorAll('.bios-exit-item');
+  biosExitItems.forEach(function(item) {
+    item.addEventListener('click', async function() {
+      var action = item.dataset.action;
+      var bootMenu = document.getElementById('boot-menu');
+      
+      switch (action) {
+        case 'continue':
+          bootMenu.style.display = 'none';
+          var bootOverlay = document.getElementById('boot-overlay');
+          if (bootOverlay) bootOverlay.style.display = '';
+          finishBoot();
+          break;
+          
+        case 'save-restart':
+          saveBiosSettings();
+          bootMenu.style.display = 'none';
+          showNotification('BIOS', 'Settings saved. Restarting...', 'save');
+          setTimeout(function() { location.reload(); }, 1500);
+          break;
+          
+        case 'discard-restart':
+          bootMenu.style.display = 'none';
+          showNotification('BIOS', 'Settings discarded', 'refresh-cw');
+          setTimeout(function() { location.reload(); }, 1500);
+          break;
+          
+        case 'recovery':
+          const recoveryConfirmed = await showModal({title: 'WARNING', message: 'This will erase ALL your data and reset WebOS to factory settings. Continue?', confirmText: 'Continue', cancelText: 'Cancel', danger: true});
+          if (recoveryConfirmed) {
+            runRecoveryMode();
+          }
+          break;
+          
+        case 'restart':
+          bootMenu.style.display = 'none';
+          showNotification('Restarting...', 'Please wait', 'rotate-cw');
+          setTimeout(function() { location.reload(); }, 1000);
+          break;
+          
+        case 'reset-bios':
+          const resetBiosConfirmed = await showModal({title: 'Reset BIOS', message: 'Reset all BIOS settings to defaults?', confirmText: 'Yes', cancelText: 'No'});
+          if (resetBiosConfirmed) {
+            updateBiosClock();
+            var toggleFields = document.querySelectorAll('.bios-toggle');
+            toggleFields.forEach(function(el) {
+              var option = el.dataset.option;
+              var defaultValues = {
+                'virtualization': true,
+                'secureBoot': false,
+                'fastBoot': true,
+                'usbSupport': true,
+                'pxeBoot': false,
+                'legacySupport': false,
+                'hyperThreading': true,
+                'vtD': false,
+                'bootMode': 'UEFI',
+                'quickBoot': true,
+                'bootSound': true,
+                'numLock': true
+              };
+              var val = defaultValues[option];
+              el.textContent = '[' + (val ? 'Enabled' : 'Disabled') + ']';
+            });
+            localStorage.removeItem('wos_bios');
+            showNotification('BIOS', 'Settings reset to defaults', 'refresh-cw');
+          }
+          break;
+      }
+    });
+  });
+  
+  // Editable BIOS fields - Date
+  var dateEdit = document.getElementById('bios-date-edit');
+  if (dateEdit) {
+    dateEdit.addEventListener('click', async function() {
+      var current = document.getElementById('bios-date').textContent;
+      var input = await showModal({title: 'Edit Date', message: 'Enter date (e.g., Wed 04/21/2026):', input: true, defaultValue: current, confirmText: 'OK', cancelText: 'Cancel'});
+      if (input && input !== current) {
+        document.getElementById('bios-date').textContent = input;
+        showNotification('BIOS', 'Date set to ' + input, 'save');
+      }
+    });
+  }
+  
+  // Editable BIOS fields - Time
+  var timeEdit = document.getElementById('bios-time-edit');
+  if (timeEdit) {
+    timeEdit.addEventListener('click', async function() {
+      var current = document.getElementById('bios-time').textContent;
+      var input = await showModal({title: 'Edit Time', message: 'Enter time (e.g., 14:30:00):', input: true, defaultValue: current, confirmText: 'OK', cancelText: 'Cancel'});
+      if (input && input !== current) {
+        document.getElementById('bios-time').textContent = input;
+        showNotification('BIOS', 'Time set to ' + input, 'save');
+      }
+    });
+  }
+  
+  // Toggle BIOS settings
+  var toggleFields = document.querySelectorAll('.bios-toggle');
+  toggleFields.forEach(function(el) {
+    el.addEventListener('click', function() {
+      var current = el.textContent;
+      var isEnabled = current.indexOf('Enabled') !== -1;
+      var isDisabled = current.indexOf('Disabled') !== -1;
+      var isUEFI = current.indexOf('UEFI') !== -1;
+      var isLegacy = current.indexOf('Legacy') !== -1;
+      var isDark = current.indexOf('Dark') !== -1;
+      var isLight = current.indexOf('Light') !== -1;
+      var elId = el.id;
+      
+      // Handle different toggle types
+      if (isEnabled || isDisabled) {
+        el.textContent = isEnabled ? '[Disabled]' : '[Enabled]';
+        var newEnabled = !isEnabled;
+        
+        // Apply setting immediately
+        if (elId === 'bios-transparency') {
+          if (newEnabled) {
+            document.documentElement.classList.remove('reduce-transparency');
+          } else {
+            document.documentElement.classList.add('reduce-transparency');
+          }
+          showNotification('BIOS', 'Transparency: ' + (newEnabled ? 'Enabled' : 'Disabled'), 'settings');
+        } else if (elId === 'bios-notifications') {
+          state.notificationsEnabled = newEnabled;
+          saveState();
+        } else if (elId === 'bios-autoplay') {
+          window.autoplayMedia = newEnabled;
+        }
+      } else if (isUEFI || isLegacy) {
+        el.textContent = isUEFI ? '[Legacy]' : '[UEFI]';
+      } else if (isDark || isLight) {
+        el.textContent = isDark ? '[Light]' : '[Dark]';
+        applyTheme(isDark ? 'light' : 'dark');
+      }
+      showNotification('BIOS', 'Setting changed', 'settings');
+    });
+  });
+  
+  // Boot device editable
+  var boot1Edit = document.getElementById('bios-boot1');
+  if (boot1Edit) {
+    boot1Edit.addEventListener('click', function() {
+      var devices = ['WebOS Drive', 'USB Drive', 'Network PXE', 'CD/DVD Drive', 'Disabled'];
+      var current = document.getElementById('bios-boot1').textContent.slice(1, -1);
+      var idx = devices.indexOf(current);
+      var next = devices[(idx + 1) % devices.length];
+      document.getElementById('bios-boot1').textContent = '[' + next + ']';
+      showNotification('BIOS', 'Boot device #1: ' + next, 'save');
+    });
+  }
+  
+  var boot2Edit = document.getElementById('bios-boot2');
+  if (boot2Edit) {
+    boot2Edit.addEventListener('click', function() {
+      var devices = ['WebOS Drive', 'USB Drive', 'Network PXE', 'CD/DVD Drive', 'Disabled'];
+      var current = document.getElementById('bios-boot2').textContent.slice(1, -1);
+      var idx = devices.indexOf(current);
+      var next = devices[(idx + 1) % devices.length];
+      document.getElementById('bios-boot2').textContent = '[' + next + ']';
+      showNotification('BIOS', 'Boot device #2: ' + next, 'save');
+    });
+  }
+  
+  var boot3Edit = document.getElementById('bios-boot3');
+  if (boot3Edit) {
+    boot3Edit.addEventListener('click', function() {
+      var devices = ['WebOS Drive', 'USB Drive', 'Network PXE', 'CD/DVD Drive', 'Disabled'];
+      var current = document.getElementById('bios-boot3').textContent.slice(1, -1);
+      var idx = devices.indexOf(current);
+      var next = devices[(idx + 1) % devices.length];
+      document.getElementById('bios-boot3').textContent = '[' + next + ']';
+      showNotification('BIOS', 'Boot device #3: ' + next, 'save');
+    });
+  }
+  
+// Wallpaper selector
+  var wallpaperEdit = document.getElementById('bios-wallpaper');
+  if (wallpaperEdit) {
+    wallpaperEdit.addEventListener('click', function() {
+      var wallpapers = ['Horizon', 'Aurora', 'Nebula', 'Sunset', 'Forest', 'Purple', 'Ocean', 'Rose', 'Carbon', 'Volcano', 'Arctic', 'Midnight', 'Mint', 'Peach', 'Lavender', 'Ember', 'Candy', 'Matrix'];
+      var current = document.getElementById('bios-wallpaper').textContent.slice(1, -1);
+      var idx = wallpapers.indexOf(current);
+      var next = wallpapers[(idx + 1) % wallpapers.length];
+      document.getElementById('bios-wallpaper').textContent = '[' + next + ']';
+      var wpIndex = WALLPAPERS.findIndex(function(w) { return w.name === next; });
+      if (wpIndex >= 0) applyWallpaper(wpIndex);
+      showNotification('BIOS', 'Wallpaper: ' + next, 'image');
+    });
+  }
+  
+  // Accent color selector
+  var accentEdit = document.getElementById('bios-accent');
+  if (accentEdit) {
+    accentEdit.addEventListener('click', function() {
+      var colors = ['Blue', 'Purple', 'Green', 'Orange', 'Teal', 'Red', 'Gray', 'Cyan', 'Pink', 'Yellow', 'Mint', 'Indigo', 'Magenta', 'Crimson', 'HotPink', 'Lime'];
+      var current = document.getElementById('bios-accent').textContent.slice(1, -1);
+      var idx = colors.indexOf(current);
+      var next = colors[(idx + 1) % colors.length];
+      var accentMap = { 
+        'Blue': '#0078d4', 'Purple': '#8764b8', 'Green': '#567c34', 'Orange': '#ca5010', 
+        'Teal': '#008b8b', 'Red': '#c43e1c', 'Gray': '#69797e', 'Cyan': '#038387',
+        'Pink': '#e74856', 'Yellow': '#ff8c00', 'Mint': '#00b294', 'Indigo': '#6b69de',
+        'Magenta': '#a426a4', 'Crimson': '#d1342a', 'HotPink': '#e3008c', 'Lime': '#567c34'
+      };
+      document.getElementById('bios-accent').textContent = '[' + next + ']';
+      applyAccent(accentMap[next]);
+      showNotification('BIOS', 'Accent: ' + next, 'palette');
+    });
+  }
+  
+  // Clock format selector
+  var clockFmtEdit = document.getElementById('bios-clockfmt');
+  if (clockFmtEdit) {
+    clockFmtEdit.addEventListener('click', function() {
+      var formats = ['24-hour', '12-hour'];
+      var current = document.getElementById('bios-clockfmt').textContent.slice(1, -1);
+      var idx = formats.indexOf(current);
+      var next = formats[(idx + 1) % formats.length];
+      document.getElementById('bios-clockfmt').textContent = '[' + next + ']';
+      window.clockFormat = next;
+      showNotification('BIOS', 'Clock: ' + next, 'clock');
+    });
+  }
+  
+  // Date format selector
+  var dateFmtEdit = document.getElementById('bios-datefmt');
+  if (dateFmtEdit) {
+    dateFmtEdit.addEventListener('click', function() {
+      var formats = ['MM/DD/YYYY', 'DD/MM/YYYY', 'YYYY-MM-DD'];
+      var current = document.getElementById('bios-datefmt').textContent.slice(1, -1);
+      var idx = formats.indexOf(current);
+      var next = formats[(idx + 1) % formats.length];
+      document.getElementById('bios-datefmt').textContent = '[' + next + ']';
+      window.dateFormat = next;
+      showNotification('BIOS', 'Date: ' + next, 'calendar');
+    });
+  }
+  
+  // Volume selector
+  var volumeEdit = document.getElementById('bios-volume');
+  if (volumeEdit) {
+    volumeEdit.addEventListener('click', function() {
+      var volumes = ['0%', '20%', '40%', '60%', '80%', '100%'];
+      var current = document.getElementById('bios-volume').textContent.slice(1, -1);
+      var idx = volumes.indexOf(current);
+      var next = volumes[(idx + 1) % volumes.length];
+      document.getElementById('bios-volume').textContent = '[' + next + ']';
+      var vol = parseInt(next);
+      window.systemVolume = vol / 100;
+      if (typeof setVolume === 'function') setVolume(window.systemVolume);
+      showNotification('BIOS', 'Volume: ' + next, 'volume-2');
+    });
+  }
+}
+
 function init() {
-  // Apply saved settings
+  // Setup BIOS click handlers
+  setupBiosHandlers();
+
+  // Apply BIOS settings first (these override state defaults if saved)
+  applyBiosSettings();
+
+  // Apply saved settings from state
   applyTheme(state.theme);
   applyWallpaper(state.wallpaper);
   applyAccent(state.accent);
@@ -5980,16 +6862,35 @@ function init() {
   buildDesktopIcons();
   updateTaskbar();
 
-  setTimeout(() => {
-    document.getElementById('boot-overlay').classList.add('boot-done');
-  }, 1200);
+  finishBoot();
+}
 
-  // Show login if locked, otherwise welcome
-  setTimeout(() => {
+function finishBoot() {
+  bootComplete = true;
+  if (document.getElementById('boot-menu')) document.getElementById('boot-menu').style.display = 'none';
+
+  // Check fast boot setting
+  var settings = loadBiosSettings();
+  var fastBoot = settings && settings.fastBoot;
+  var bootSound = settings && settings.bootSound;
+  
+  // Play boot sound if enabled
+  if (bootSound) {
+    playBootSound();
+  }
+  
+  // Fast boot = shorter delay (500ms), normal = 1900ms
+  var bootDelay = fastBoot ? 500 : 1900;
+  var overlayDelay = fastBoot ? 200 : 1200;
+
+  setTimeout(function() {
+    document.getElementById('boot-overlay').classList.add('boot-done');
+  }, overlayDelay);
+
+  setTimeout(function() {
     console.log('Checking lock - password:', state.password ? 'yes' : 'no', 'locked:', state.locked);
 
-    // First hide boot-overlay completely
-    const boot = document.getElementById('boot-overlay');
+    var boot = document.getElementById('boot-overlay');
     if (boot) { boot.style.display = 'none'; boot.classList.add('boot-done'); }
 
     if (state.password && state.locked) {
@@ -5998,10 +6899,33 @@ function init() {
     } else {
       showNotification('Welcome to WebOS 12', 'Double-click desktop icons or use the Start menu to open apps.', 'sparkles');
     }
-  }, 1900);
+  }, bootDelay);
 
   syncRadioPillChrome();
   refreshLucideIcons(document.body);
+}
+
+// Play boot sound
+function playBootSound() {
+  try {
+    // Create a simple beep sound using Web Audio API
+    var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    var oscillator = audioContext.createOscillator();
+    var gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  } catch (e) {
+    console.log('Boot sound not supported');
+  }
 }
 
 function showLockScreen() {
